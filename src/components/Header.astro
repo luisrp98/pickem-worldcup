@@ -1,24 +1,20 @@
 ---
 const links = [
-  { href: "#predictions", label: "PREDICCIONES" },
-  { href: "#leaderboard", label: "CLASIFICACIÓN" },
-  { href: "#rules", label: "REGLAS" },
+  { href: '#predictions', label: 'PREDICCIONES' },
+  { href: '#leaderboard', label: 'CLASIFICACIÓN' },
+  { href: '#rules', label: 'REGLAS' },
 ];
 ---
 
-<header
-  class="z-20
+<header class="z-20
       bg-bg-primary
       border-b-4 border-r-8 border-bg-secondary
-      sticky top-0"
->
-  <div
-    class="flex
+      sticky top-0">
+  <div class="flex
       max-w-300 h-14
       mx-auto px-6
       items-center justify-between relative
-      md:px-8"
-  >
+      md:px-8">
     <a
       href="/"
       class="text-lg font-bold tracking-widest text-text-primary
@@ -37,14 +33,7 @@ const links = [
           sm:hidden"
       aria-label="Abrir menú"
     >
-      <svg
-        id="menu-icon-open"
-        class="size-6"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-      >
+      <svg id="menu-icon-open" class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M3 12h18M3 6h18M3 18h18"></path>
       </svg>
       <svg
@@ -113,17 +102,12 @@ const links = [
 
 <script>
   function initMobileMenu() {
-    const toggleElement = document.getElementById("menu-toggle");
-    const menuElement = document.getElementById("mobile-menu");
-    const iconCloseElement = document.getElementById("menu-icon-close");
-    const iconOpenElement = document.getElementById("menu-icon-open");
+    const toggleElement = document.getElementById('menu-toggle');
+    const menuElement = document.getElementById('mobile-menu');
+    const iconCloseElement = document.getElementById('menu-icon-close');
+    const iconOpenElement = document.getElementById('menu-icon-open');
 
-    if (
-      !toggleElement ||
-      !menuElement ||
-      !iconOpenElement ||
-      !iconCloseElement
-    ) {
+    if (!toggleElement || !menuElement || !iconOpenElement || !iconCloseElement) {
       return;
     }
 
@@ -135,22 +119,22 @@ const links = [
     const isMobile = () => window.innerWidth < 640;
 
     function openMenu() {
-      menu.classList.remove("hidden");
-      menu.removeAttribute("hidden");
-      iconOpen.classList.add("hidden");
-      iconClose.classList.remove("hidden");
-      iconClose.removeAttribute("hidden");
+      menu.classList.remove('hidden');
+      menu.removeAttribute('hidden');
+      iconOpen.classList.add('hidden');
+      iconClose.classList.remove('hidden');
+      iconClose.removeAttribute('hidden');
     }
 
     function closeMenu() {
-      menu.classList.add("hidden");
-      menu.setAttribute("hidden", "");
-      iconOpen.classList.remove("hidden");
-      iconClose.classList.add("hidden");
-      iconClose.setAttribute("hidden", "");
+      menu.classList.add('hidden');
+      menu.setAttribute('hidden', '');
+      iconOpen.classList.remove('hidden');
+      iconClose.classList.add('hidden');
+      iconClose.setAttribute('hidden', '');
     }
 
-    toggle.addEventListener("click", () => {
+    toggle.addEventListener('click', () => {
       if (!isMobile()) return;
       if (menu.hidden) {
         openMenu();
@@ -159,17 +143,17 @@ const links = [
       }
     });
 
-    menu.querySelectorAll("a").forEach((link) => {
-      link.addEventListener("click", closeMenu);
+    menu.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', closeMenu);
     });
 
-    window.addEventListener("resize", () => {
+    window.addEventListener('resize', () => {
       if (!isMobile()) closeMenu();
     });
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initMobileMenu);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMobileMenu);
   } else {
     initMobileMenu();
   }
