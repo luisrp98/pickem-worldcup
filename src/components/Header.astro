@@ -1,0 +1,176 @@
+---
+const links = [
+  { href: "#predictions", label: "PREDICCIONES" },
+  { href: "#leaderboard", label: "CLASIFICACIÓN" },
+  { href: "#rules", label: "REGLAS" },
+];
+---
+
+<header
+  class="z-20
+      bg-bg-primary
+      border-b-4 border-r-8 border-bg-secondary
+      sticky top-0"
+>
+  <div
+    class="flex
+      max-w-300 h-14
+      mx-auto px-6
+      items-center justify-between relative
+      md:px-8"
+  >
+    <a
+      href="/"
+      class="text-lg font-bold tracking-widest text-text-primary
+          transition-colors
+          hover:text-text-hover-primary"
+    >
+      PICK'EM
+    </a>
+
+    <button
+      id="menu-toggle"
+      class="flex
+          text-text-primary
+          transition-colors
+          relative size-10 items-center justify-center hover:text-text-hover-primary
+          sm:hidden"
+      aria-label="Abrir menú"
+    >
+      <svg
+        id="menu-icon-open"
+        class="size-6"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <path d="M3 12h18M3 6h18M3 18h18"></path>
+      </svg>
+      <svg
+        id="menu-icon-close"
+        class="hidden
+            size-6"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <path d="M18 6 6 18M6 6l12 12"></path>
+      </svg>
+    </button>
+
+    <nav class="hidden
+        gap-0.5
+        sm:flex">
+      {
+        links.map((link) => (
+          <a
+            href={link.href}
+            class="
+              px-4 py-2
+              text-xs font-medium tracking-widest text-text-secondary
+              transition-colors
+              relative hover:text-text-hover-primary
+            "
+          >
+            {link.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div
+      id="mobile-menu"
+      class="max-sm:absolute max-sm:left-0 max-sm:right-0 max-sm:top-full max-sm:bg-bg-primary max-sm:border-t-2 max-sm:border-bg-secondary max-sm:shadow-lg max-sm:z-30
+          sm:hidden"
+      hidden
+    >
+      <nav class="flex flex-col
+          px-6 py-4
+          gap-1">
+        {
+          links.map((link) => (
+            <a
+              href={link.href}
+              class="
+                block
+                px-4 py-3
+                text-sm font-medium tracking-widest text-text-secondary
+                rounded-sm
+                transition-colors
+                hover:text-text-hover-primary hover:bg-arceus-primary-100
+              "
+            >
+              {link.label}
+            </a>
+          ))
+        }
+      </nav>
+    </div>
+  </div>
+</header>
+
+<script>
+  function initMobileMenu() {
+    const toggleElement = document.getElementById("menu-toggle");
+    const menuElement = document.getElementById("mobile-menu");
+    const iconCloseElement = document.getElementById("menu-icon-close");
+    const iconOpenElement = document.getElementById("menu-icon-open");
+
+    if (
+      !toggleElement ||
+      !menuElement ||
+      !iconOpenElement ||
+      !iconCloseElement
+    ) {
+      return;
+    }
+
+    const toggle = toggleElement;
+    const menu = menuElement;
+    const iconOpen = iconOpenElement;
+    const iconClose = iconCloseElement;
+
+    const isMobile = () => window.innerWidth < 640;
+
+    function openMenu() {
+      menu.classList.remove("hidden");
+      menu.removeAttribute("hidden");
+      iconOpen.classList.add("hidden");
+      iconClose.classList.remove("hidden");
+      iconClose.removeAttribute("hidden");
+    }
+
+    function closeMenu() {
+      menu.classList.add("hidden");
+      menu.setAttribute("hidden", "");
+      iconOpen.classList.remove("hidden");
+      iconClose.classList.add("hidden");
+      iconClose.setAttribute("hidden", "");
+    }
+
+    toggle.addEventListener("click", () => {
+      if (!isMobile()) return;
+      if (menu.hidden) {
+        openMenu();
+      } else {
+        closeMenu();
+      }
+    });
+
+    menu.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", closeMenu);
+    });
+
+    window.addEventListener("resize", () => {
+      if (!isMobile()) closeMenu();
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initMobileMenu);
+  } else {
+    initMobileMenu();
+  }
+</script>
