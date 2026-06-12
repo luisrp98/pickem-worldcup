@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Space Grotesk", sans-serif;
+
+  /* Arceus Color Palette
+  Gotten from -> https://www.pokemonpalette.com/ */
+
+  /* Arceus Primary */
+  --color-arceus-primary-50: #f7f7f8;
+  --color-arceus-primary-100: #e6e6ee; /* Principal */
+  --color-arceus-primary-200: #d6d6e0;
+  --color-arceus-primary-300: #bbbbce;
+  --color-arceus-primary-400: #9999b8;
+  --color-arceus-primary-500: #7d7da6;
+  --color-arceus-primary-600: #636392;
+  --color-arceus-primary-700: #515175;
+  --color-arceus-primary-800: #404059;
+  --color-arceus-primary-900: #303040;
+  --color-arceus-primary-950: #202028;
+
+  /* Arceus Secondary */
+  --color-arceus-secondary-50: #f7f7f8;
+  --color-arceus-secondary-100: #ececee;
+  --color-arceus-secondary-200: #dadadd;
+  --color-arceus-secondary-300: #b4b4bd; /* Principal */
+  --color-arceus-secondary-400: #a3a3ad;
+  --color-arceus-secondary-500: #8b8b9b;
+  --color-arceus-secondary-600: #737382;
+  --color-arceus-secondary-700: #5e5e69;
+  --color-arceus-secondary-800: #494950;
+  --color-arceus-secondary-900: #36363b;
+  --color-arceus-secondary-950: #222225;
+
+  /* Arceus Accent */
+  --color-arceus-accent-50: #faf9f4;
+  --color-arceus-accent-100: #f5f2e5;
+  --color-arceus-accent-200: #eee7c9;
+  --color-arceus-accent-300: #e6dba2;
+  --color-arceus-accent-400: #e0ce70;
+  --color-arceus-accent-500: #ddc44a; /* Principal */
+  --color-arceus-accent-600: #ceb227;
+  --color-arceus-accent-700: #a48e23;
+  --color-arceus-accent-800: #796a20;
+  --color-arceus-accent-900: #554b1b;
+  --color-arceus-accent-950: #322d15;
+
+  /* Group Colors */
+  --color-group-a-primary: #2563eb;
+  --color-group-a-secondary: #93c5fd;
+
+  --color-group-b-primary: #059669;
+  --color-group-b-secondary: #6ee7b7;
+
+  --color-group-c-primary: #dc2626;
+  --color-group-c-secondary: #fca5a5;
+
+  --color-group-d-primary: #7c3aed;
+  --color-group-d-secondary: #c4b5fd;
+
+  --color-group-e-primary: #ea580c;
+  --color-group-e-secondary: #fdba74;
+
+  --color-group-f-primary: #0891b2;
+  --color-group-f-secondary: #a5f3fc;
+
+  --color-group-g-primary: #65a30d;
+  --color-group-g-secondary: #bef264;
+
+  --color-group-h-primary: #db2777;
+  --color-group-h-secondary: #f9a8d4;
+
+  --color-group-i-primary: #4f46e5;
+  --color-group-i-secondary: #a5b4fc;
+
+  --color-group-j-primary: #d97706;
+  --color-group-j-secondary: #fcd34d;
+
+  --color-group-k-primary: #0f766e;
+  --color-group-k-secondary: #99f6e4;
+
+  --color-group-l-primary: #be123c;
+  --color-group-l-secondary: #fda4af;
+
+  /* Text */
+  --color-text-primary: var(--color-arceus-secondary-950);
+  --color-text-secondary: var(--color-arceus-secondary-700);
+  --color-text-hover-primary: var(--color-arceus-accent-500);
+
+  /* Background */
+  --color-bg-primary: var(--color-arceus-primary-50);
+  --color-bg-secondary: var(--color-arceus-secondary-950);
+}
