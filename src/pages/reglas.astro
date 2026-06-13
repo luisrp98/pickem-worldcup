@@ -1,10 +1,174 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import ShadowContainer from '../components/ShadowContainer.astro';
+import RuleCard from '../components/RuleCard.astro';
+import PointsTable from '../components/PointsTable.astro';
+import BulletList from '../components/BulletList.astro';
+
+const phaseGroupsMatches = {
+  intro: 'Sistema de puntuaci├│n:',
+  caption: 'Puntos por partido en fase de grupos',
+  rows: [
+    { text: 'Resultado correcto (victoria, derrota o empate)', value: '2' },
+    { text: 'Marcador exacto', value: '+5', extra: true },
+  ],
+  max: { label: 'M├íximo por partido', value: '7' },
+};
+
+const phaseGroupsPositions = {
+  intro: 'Sistema de puntuaci├│n:',
+  caption: 'Puntos por predicci├│n de posiciones en fase de grupos',
+  rows: [
+    { text: 'Cada equipo en su posici├│n exacta dentro del grupo', value: '2' },
+    { text: 'Acertar las cuatro posiciones del grupo', value: '+2', extra: true },
+  ],
+  max: { label: 'M├íximo por grupo', value: '10' },
+};
+
+const faseEliminatoriaRounds = {
+  caption: 'Puntos por resultado correcto en fase eliminatoria',
+  rows: [
+    { text: 'Dieciseisavos de final', value: '5' },
+    { text: 'Octavos de final', value: '8' },
+    { text: 'Cuartos de final', value: '12' },
+    { text: 'Semifinales', value: '18' },
+    { text: 'Final', value: '25' },
+  ],
+};
+
+const faseEliminatoriaExtra = {
+  caption: 'Puntuaci├│n adicional en fase eliminatoria',
+  rows: [{ text: 'Marcador exacto', value: '+5', extra: true }],
+};
+
+const prediccionesEspeciales = {
+  intro: 'Estas predicciones se eval├║an al finalizar el torneo:',
+  caption: 'Puntos por predicciones especiales',
+  rows: [
+    { text: 'Campe├│n del torneo', value: '25' },
+    { text: 'Subcampe├│n', value: '15' },
+    { text: 'M├íximo goleador', value: '15' },
+    { text: 'M├íximo asistidor', value: '15' },
+    { text: 'Mejor jugador del torneo', value: '15' },
+    { text: 'Hasta d├│nde llega M├®xico ­ƒç▓­ƒç¢', value: '10' },
+    { text: 'Equipo con m├ís goles anotados', value: '10' },
+    { text: 'Equipo con m├ís porter├¡as a cero', value: '10' },
+  ],
+};
+
+const empates = [
+  'Si predec├¡s empate al finalizar los 90 minutos, ser├í <strong class="text-text font-semibold">obligatorio</strong> seleccionar qu├® equipo avanza a la siguiente ronda.',
+  'No se otorgar├ín puntos adicionales por acertar el equipo clasificado.',
+  "No importa si la clasificaci├│n ocurre en tiempo extra o mediante penales; se usa solo para definir qui├®n avanza en el bracket del Pick'em.",
+];
+
+const consideraciones = [
+  'Esto es entre amigos: tom├ítelo con humor y buena onda. ­ƒñØ',
+  'Las reglas est├ín escritas para ser claras; si algo no se entiende, pregunt├í.',
+  'Los puntos importantes siempre aparecen resaltados en color.',
+  'El que queda ├║ltimo, tiene que picharle dogos a todos los jugadores ­ƒî¡',
+];
 ---
 
 <Layout
-  title="Reglas — PICKEM"
-  description="Conoce las reglas de PICKEM: puntaje, plazos, bonificaciones y criterios de desempate."
+  title="Reglas ÔÇö PICKEM"
+  description="Conoce las reglas del PICKEM: puntaje, plazos, bonificaciones y todo lo que necesit├ís saber para competir entre amigos."
 >
-  <h1>Reglas</h1>
+  <div class="max-w-[1200px] mx-auto px-6 md:px-8 py-8 md:py-12">
+    <header class="mb-8 md:mb-10">
+      <div class="flex items-center gap-4 mb-4 pb-2 border-b border-border">
+        <span class="text-xs font-semibold tracking-widest uppercase text-text-secondary">Reglas del juego</span>
+        <span class="flex-1"></span>
+      </div>
+      <h1 class="text-3xl md:text-5xl font-bold leading-[1.1] tracking-wide mb-3">
+        ┬┐C├│mo se <span class="text-text-hover-primary">punt├║a</span>?
+      </h1>
+      <p class="text-base text-text-secondary max-w-[36rem] leading-relaxed">
+        Todo lo que necesit├ís saber para competir en el PICKEM. Leelas con calma, arm├í tu estrategia y que gane el
+        mejor. <span aria-hidden="true">ÔÜ¢</span>
+      </p>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <RuleCard number={1} title="Cierre de predicciones">
+        <p class="leading-relaxed">
+          Las predicciones de cada partido se cierran
+          <strong class="text-text font-semibold">10 minutos antes del inicio oficial</strong> del encuentro. Despu├®s de eso,
+          no se aceptan cambios. <span aria-hidden="true">ÔÅ░</span>
+        </p>
+      </RuleCard>
+
+      <RuleCard number={2} title="Fase de grupos ÔÇö Partidos">
+        <p class="mb-4">{phaseGroupsMatches.intro}</p>
+        <PointsTable data={phaseGroupsMatches} />
+      </RuleCard>
+
+      <RuleCard number={3} title="Fase de grupos ÔÇö Predicci├│n de posiciones">
+        <p class="mb-4">{phaseGroupsPositions.intro}</p>
+        <PointsTable data={phaseGroupsPositions} />
+      </RuleCard>
+
+      <RuleCard number={4} title="Jackpot de grupos">
+        <p class="leading-relaxed">
+          Por acertar la cantidad exacta de puntos obtenidos por los cuatro equipos de un grupo, te llev├ís
+          <span
+            class="inline-flex items-baseline gap-1 mx-1 px-2 py-0.5 rounded-sm bg-arceus-accent-400 text-arceus-secondary-950 font-bold text-lg"
+          >
+            20<span class="text-[0.625rem] font-semibold tracking-widest uppercase">pts</span>
+          </span>
+          al bolsillo. ┬íLa grande, baby! <span aria-hidden="true">­ƒÆ░</span>
+        </p>
+      </RuleCard>
+
+      <RuleCard number={5} title="Fase eliminatoria" class="md:col-span-2">
+        <p class="mb-4 leading-relaxed">
+          Las predicciones corresponden al resultado al finalizar los
+          <strong class="text-text font-semibold">90 minutos reglamentarios</strong>.
+        </p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+          <div>
+            <p class="text-[0.6875rem] font-semibold tracking-widest uppercase text-text-tertiary mb-2">
+              Por resultado correcto
+            </p>
+            <PointsTable data={faseEliminatoriaRounds} compact />
+          </div>
+          <div>
+            <p class="text-[0.6875rem] font-semibold tracking-widest uppercase text-text-tertiary mb-2">
+              Puntuaci├│n adicional
+            </p>
+            <PointsTable data={faseEliminatoriaExtra} compact />
+            <p class="text-xs text-text-tertiary mt-3 leading-relaxed">
+              <span aria-hidden="true">­ƒÆí</span> A mayor ronda, mayor el riesgoÔÇª y mayor la recompensa.
+            </p>
+          </div>
+        </div>
+      </RuleCard>
+
+      <RuleCard number={6} title="Empates en fase eliminatoria">
+        <BulletList items={empates} class="space-y-2" />
+      </RuleCard>
+
+      <RuleCard number={7} title="Predicciones especiales">
+        <p class="mb-4">{prediccionesEspeciales.intro}</p>
+        <PointsTable data={prediccionesEspeciales} />
+      </RuleCard>
+    </div>
+
+    <div class="mt-6 md:mt-8">
+      <ShadowContainer>
+        <div class="flex items-start gap-4 p-3 text-text">
+          <span
+            class="shrink-0 w-10 h-10 rounded-md bg-arceus-secondary-950 text-arceus-primary-50 flex items-center justify-center text-lg"
+            aria-hidden="true"
+          >
+            ­ƒÆí
+          </span>
+          <div>
+            <h2 class="text-lg md:text-xl font-bold mb-2">A tener en cuenta</h2>
+            <BulletList items={consideraciones} markerClass="font-bold" class="text-sm space-y-1.5" />
+          </div>
+        </div>
+      </ShadowContainer>
+    </div>
+  </div>
 </Layout>

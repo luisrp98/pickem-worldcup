@@ -1,7 +1,7 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
-  --font-sans: "Space Grotesk", sans-serif;
+  --font-sans: 'Space Grotesk', sans-serif;
 
   /* Arceus Color Palette
   Gotten from -> https://www.pokemonpalette.com/ */
@@ -83,11 +83,30 @@
   --color-group-l-secondary: #fda4af;
 
   /* Text */
+  --color-text: var(--color-arceus-secondary-950);
   --color-text-primary: var(--color-arceus-secondary-950);
   --color-text-secondary: var(--color-arceus-secondary-700);
+  --color-text-tertiary: var(--color-arceus-secondary-300);
   --color-text-hover-primary: var(--color-arceus-accent-500);
 
   /* Background */
   --color-bg-primary: var(--color-arceus-primary-50);
   --color-bg-secondary: var(--color-arceus-secondary-950);
+
+  /* Surfaces */
+  --color-surface: #ffffff;
+  --color-muted: var(--color-arceus-secondary-100);
+
+  /* Borders */
+  --color-border: var(--color-arceus-secondary-200);
+  --color-border-strong: var(--color-arceus-secondary-500);
+
+  /* Accent (botones, badges, highlights) */
+  --color-accent: var(--color-arceus-accent-500);
+  --color-accent-hover: var(--color-arceus-accent-600);
+
+  /* Medallas */
+  --color-gold: #d4a017;
+  --color-silver: var(--color-arceus-secondary-400);
+  --color-bronze: #b87333;
 }

@@ -1,0 +1,23 @@
+---
+export interface Props {
+  items: string[];
+  marker?: string;
+  markerClass?: string;
+  class?: string;
+}
+
+const { items, marker = 'ÔÇ║', markerClass = 'text-text-hover-primary font-bold', class: className } = Astro.props;
+---
+
+<ul class:list={['leading-relaxed list-none', className]}>
+  {
+    items.map((item) => (
+      <li class="flex gap-2">
+        <span class:list={['shrink-0', markerClass]} aria-hidden="true">
+          {marker}
+        </span>
+        <span set:html={item} />
+      </li>
+    ))
+  }
+</ul>

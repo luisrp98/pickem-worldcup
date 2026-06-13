@@ -1,0 +1,64 @@
+---
+export interface PointRow {
+  text: string;
+  value: string;
+  extra?: boolean;
+}
+
+export interface PointsMax {
+  label: string;
+  value: string;
+}
+
+export interface PointsTableData {
+  rows: PointRow[];
+  max?: PointsMax;
+  caption?: string;
+}
+
+export interface Props {
+  data: PointsTableData;
+  compact?: boolean;
+}
+
+const { data, compact = false } = Astro.props;
+const py = compact ? 'py-2' : 'py-2.5';
+---
+
+<div class="overflow-x-auto -mx-2">
+  <table class="w-full text-sm border-collapse">
+    {data.caption && <caption class="sr-only">{data.caption}</caption>}
+    <tbody>
+      {
+        data.rows.map((row) => (
+          <tr class="border-b border-border">
+            <td class:list={['px-2', py, 'text-text-secondary']}>
+              {row.text}
+              {row.extra && (
+                <>
+                  {' '}
+                  <span class="text-text-tertiary">(extra)</span>
+                </>
+              )}
+            </td>
+            <td class:list={['px-2', py, 'text-right whitespace-nowrap font-semibold text-text']}>
+              <span class="text-text-hover-primary">{row.value}</span>
+              <span class="text-text-tertiary text-xs ml-1">pts</span>
+            </td>
+          </tr>
+        ))
+      }
+      {
+        data.max && (
+          <tr class="bg-muted">
+            <td class:list={['px-2', py, 'font-semibold text-text']}>{data.max.label}</td>
+            <td class:list={['px-2', py, 'text-right whitespace-nowrap']}>
+              <span class="font-bold text-base text-text-hover-primary">{data.max.value}</span>
+              <span class="text-text-tertiary text-xs ml-1">pts</span>
+            </td>
+          </tr>
+        )
+      }
+    </tbody>
+  </table>
+</div>
