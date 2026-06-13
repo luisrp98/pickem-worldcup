@@ -6,23 +6,23 @@ import PointsTable from '../components/PointsTable.astro';
 import BulletList from '../components/BulletList.astro';
 
 const phaseGroupsMatches = {
-  intro: 'Sistema de puntuaci├│n:',
+  intro: 'Sistema de puntuación:',
   caption: 'Puntos por partido en fase de grupos',
   rows: [
     { text: 'Resultado correcto (victoria, derrota o empate)', value: '2' },
     { text: 'Marcador exacto', value: '+5', extra: true },
   ],
-  max: { label: 'M├íximo por partido', value: '7' },
+  max: { label: 'Máximo por partido', value: '7' },
 };
 
 const phaseGroupsPositions = {
-  intro: 'Sistema de puntuaci├│n:',
-  caption: 'Puntos por predicci├│n de posiciones en fase de grupos',
+  intro: 'Sistema de puntuación:',
+  caption: 'Puntos por predicción de posiciones en fase de grupos',
   rows: [
-    { text: 'Cada equipo en su posici├│n exacta dentro del grupo', value: '2' },
+    { text: 'Cada equipo en su posición exacta dentro del grupo', value: '2' },
     { text: 'Acertar las cuatro posiciones del grupo', value: '+2', extra: true },
   ],
-  max: { label: 'M├íximo por grupo', value: '10' },
+  max: { label: 'Máximo por grupo', value: '10' },
 };
 
 const faseEliminatoriaRounds = {
@@ -37,55 +37,55 @@ const faseEliminatoriaRounds = {
 };
 
 const faseEliminatoriaExtra = {
-  caption: 'Puntuaci├│n adicional en fase eliminatoria',
+  caption: 'Puntuación adicional en fase eliminatoria',
   rows: [{ text: 'Marcador exacto', value: '+5', extra: true }],
 };
 
 const prediccionesEspeciales = {
-  intro: 'Estas predicciones se eval├║an al finalizar el torneo:',
+  intro: 'Estas predicciones se evalúan al finalizar el torneo:',
   caption: 'Puntos por predicciones especiales',
   rows: [
-    { text: 'Campe├│n del torneo', value: '25' },
-    { text: 'Subcampe├│n', value: '15' },
-    { text: 'M├íximo goleador', value: '15' },
-    { text: 'M├íximo asistidor', value: '15' },
+    { text: 'Campeón del torneo', value: '25' },
+    { text: 'Subcampeón', value: '15' },
+    { text: 'Máximo goleador', value: '15' },
+    { text: 'Máximo asistidor', value: '15' },
     { text: 'Mejor jugador del torneo', value: '15' },
-    { text: 'Hasta d├│nde llega M├®xico ­ƒç▓­ƒç¢', value: '10' },
-    { text: 'Equipo con m├ís goles anotados', value: '10' },
-    { text: 'Equipo con m├ís porter├¡as a cero', value: '10' },
+    { text: 'Hasta dónde llega México 🇲🇽', value: '10' },
+    { text: 'Equipo con más goles anotados', value: '10' },
+    { text: 'Equipo con más porterías a cero', value: '10' },
   ],
 };
 
 const empates = [
-  'Si predec├¡s empate al finalizar los 90 minutos, ser├í <strong class="text-text font-semibold">obligatorio</strong> seleccionar qu├® equipo avanza a la siguiente ronda.',
-  'No se otorgar├ín puntos adicionales por acertar el equipo clasificado.',
-  "No importa si la clasificaci├│n ocurre en tiempo extra o mediante penales; se usa solo para definir qui├®n avanza en el bracket del Pick'em.",
+  'Si predecís empate al finalizar los 90 minutos, será <strong class="text-text font-semibold">obligatorio</strong> seleccionar qué equipo avanza a la siguiente ronda.',
+  'No se otorgarán puntos adicionales por acertar el equipo clasificado.',
+  "No importa si la clasificación ocurre en tiempo extra o mediante penales; se usa solo para definir quién avanza en el bracket del Pick'em.",
 ];
 
 const consideraciones = [
-  'Esto es entre amigos: tom├ítelo con humor y buena onda. ­ƒñØ',
-  'Las reglas est├ín escritas para ser claras; si algo no se entiende, pregunt├í.',
+  'Esto es entre amigos: tomátelo con humor y buena onda. 🥰',
+  'Las reglas están escritas para ser claras; si algo no se entiende, preguntá.',
   'Los puntos importantes siempre aparecen resaltados en color.',
-  'El que queda ├║ltimo, tiene que picharle dogos a todos los jugadores ­ƒî¡',
+  'El que queda último, tiene que picharle dogos a todos los jugadores 🍕',
 ];
 ---
 
 <Layout
-  title="Reglas ÔÇö PICKEM"
-  description="Conoce las reglas del PICKEM: puntaje, plazos, bonificaciones y todo lo que necesit├ís saber para competir entre amigos."
+  title="Reglas — PICKEM"
+  description="Conoce las reglas del PICKEM: puntaje, plazos, bonificaciones y todo lo que necesitás saber para competir entre amigos."
 >
-  <div class="max-w-[1200px] mx-auto px-6 md:px-8 py-8 md:py-12">
+  <div class="max-w-300 mx-auto px-6 md:px-8 py-8 md:py-12">
     <header class="mb-8 md:mb-10">
       <div class="flex items-center gap-4 mb-4 pb-2 border-b border-border">
         <span class="text-xs font-semibold tracking-widest uppercase text-text-secondary">Reglas del juego</span>
         <span class="flex-1"></span>
       </div>
       <h1 class="text-3xl md:text-5xl font-bold leading-[1.1] tracking-wide mb-3">
-        ┬┐C├│mo se <span class="text-text-hover-primary">punt├║a</span>?
+        ¿Cómo se <span class="text-text-hover-primary">puntúa</span>?
       </h1>
-      <p class="text-base text-text-secondary max-w-[36rem] leading-relaxed">
-        Todo lo que necesit├ís saber para competir en el PICKEM. Leelas con calma, arm├í tu estrategia y que gane el
-        mejor. <span aria-hidden="true">ÔÜ¢</span>
+      <p class="text-base text-text-secondary max-w-xl leading-relaxed">
+        Todo lo que necesitás saber para competir en el PICKEM. Leelas con calma, armá tu estrategia y que gane el
+        mejor. <span aria-hidden="true">⏱</span>
       </p>
     </header>
 
@@ -93,30 +93,30 @@ const consideraciones = [
       <RuleCard number={1} title="Cierre de predicciones">
         <p class="leading-relaxed">
           Las predicciones de cada partido se cierran
-          <strong class="text-text font-semibold">10 minutos antes del inicio oficial</strong> del encuentro. Despu├®s de eso,
-          no se aceptan cambios. <span aria-hidden="true">ÔÅ░</span>
+          <strong class="text-text font-semibold">10 minutos antes del inicio oficial</strong> del encuentro. Después de eso,
+          no se aceptan cambios. <span aria-hidden="true">⛔</span>
         </p>
       </RuleCard>
 
-      <RuleCard number={2} title="Fase de grupos ÔÇö Partidos">
+      <RuleCard number={2} title="Fase de grupos — Partidos">
         <p class="mb-4">{phaseGroupsMatches.intro}</p>
         <PointsTable data={phaseGroupsMatches} />
       </RuleCard>
 
-      <RuleCard number={3} title="Fase de grupos ÔÇö Predicci├│n de posiciones">
+      <RuleCard number={3} title="Fase de grupos — Predicción de posiciones">
         <p class="mb-4">{phaseGroupsPositions.intro}</p>
         <PointsTable data={phaseGroupsPositions} />
       </RuleCard>
 
       <RuleCard number={4} title="Jackpot de grupos">
         <p class="leading-relaxed">
-          Por acertar la cantidad exacta de puntos obtenidos por los cuatro equipos de un grupo, te llev├ís
+          Por acertar la cantidad exacta de puntos obtenidos por los cuatro equipos de un grupo, te llevás
           <span
             class="inline-flex items-baseline gap-1 mx-1 px-2 py-0.5 rounded-sm bg-arceus-accent-400 text-arceus-secondary-950 font-bold text-lg"
           >
             20<span class="text-[0.625rem] font-semibold tracking-widest uppercase">pts</span>
           </span>
-          al bolsillo. ┬íLa grande, baby! <span aria-hidden="true">­ƒÆ░</span>
+          al bolsillo. ¡La grande, baby! <span aria-hidden="true">🏆</span>
         </p>
       </RuleCard>
 
@@ -134,11 +134,11 @@ const consideraciones = [
           </div>
           <div>
             <p class="text-[0.6875rem] font-semibold tracking-widest uppercase text-text-tertiary mb-2">
-              Puntuaci├│n adicional
+              Puntuación adicional
             </p>
             <PointsTable data={faseEliminatoriaExtra} compact />
             <p class="text-xs text-text-tertiary mt-3 leading-relaxed">
-              <span aria-hidden="true">­ƒÆí</span> A mayor ronda, mayor el riesgoÔÇª y mayor la recompensa.
+              <span aria-hidden="true">🏅</span> A mayor ronda, mayor el riesgo… y mayor la recompensa.
             </p>
           </div>
         </div>
@@ -161,7 +161,7 @@ const consideraciones = [
             class="shrink-0 w-10 h-10 rounded-md bg-arceus-secondary-950 text-arceus-primary-50 flex items-center justify-center text-lg"
             aria-hidden="true"
           >
-            ­ƒÆí
+            🏅
           </span>
           <div>
             <h2 class="text-lg md:text-xl font-bold mb-2">A tener en cuenta</h2>

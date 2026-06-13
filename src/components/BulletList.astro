@@ -6,7 +6,7 @@ export interface Props {
   class?: string;
 }
 
-const { items, marker = 'ÔÇ║', markerClass = 'text-text-hover-primary font-bold', class: className } = Astro.props;
+const { items, marker = '>', markerClass = 'text-text-hover-primary font-bold', class: className } = Astro.props;
 ---
 
 <ul class:list={['leading-relaxed list-none', className]}>
