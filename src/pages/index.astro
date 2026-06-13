@@ -1,224 +1,16 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Shadow_container from '../components/Shadow_Container.astro';
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
-import PredictionCard from '../components/PredictionCard.astro';
-import RulesGrid from '../components/RulesGrid.astro';
-import Leaderboard from '../components/Leaderboard.astro';
-
-const rounds = [
-  {
-    id: 1,
-    name: 'JORNADA 1',
-    matches: [
-      {
-        home: 'Argentina',
-        away: 'Brasil',
-        homeFlag: '🇦🇷',
-        awayFlag: '🇧🇷',
-        date: '14 JUN 2026',
-        time: '16:00',
-        status: 'completed',
-        homeScore: 2,
-        awayScore: 1,
-      },
-      {
-        home: 'Uruguay',
-        away: 'Colombia',
-        homeFlag: '🇺🇾',
-        awayFlag: '🇨🇴',
-        date: '14 JUN 2026',
-        time: '19:00',
-        status: 'completed',
-        homeScore: 0,
-        awayScore: 0,
-      },
-      {
-        home: 'Chile',
-        away: 'Perú',
-        homeFlag: '🇨🇱',
-        awayFlag: '🇵🇪',
-        date: '15 JUN 2026',
-        time: '16:00',
-        status: 'locked',
-      },
-      {
-        home: 'Ecuador',
-        away: 'Paraguay',
-        homeFlag: '🇪🇨',
-        awayFlag: '🇵🇾',
-        date: '15 JUN 2026',
-        time: '19:00',
-        status: 'pending',
-      },
-      {
-        home: 'Bolivia',
-        away: 'Venezuela',
-        homeFlag: '🇧🇴',
-        awayFlag: '🇻🇪',
-        date: '16 JUN 2026',
-        time: '16:00',
-        status: 'pending',
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: 'JORNADA 2',
-    matches: [
-      {
-        home: 'Brasil',
-        away: 'Uruguay',
-        homeFlag: '🇧🇷',
-        awayFlag: '🇺🇾',
-        date: '20 JUN 2026',
-        time: '16:00',
-        status: 'pending',
-      },
-      {
-        home: 'Argentina',
-        away: 'Chile',
-        homeFlag: '🇦🇷',
-        awayFlag: '🇨🇱',
-        date: '20 JUN 2026',
-        time: '19:00',
-        status: 'pending',
-      },
-      {
-        home: 'Colombia',
-        away: 'Ecuador',
-        homeFlag: '🇨🇴',
-        awayFlag: '🇪🇨',
-        date: '21 JUN 2026',
-        time: '16:00',
-        status: 'pending',
-      },
-      {
-        home: 'Perú',
-        away: 'Bolivia',
-        homeFlag: '🇵🇪',
-        awayFlag: '🇧🇴',
-        date: '21 JUN 2026',
-        time: '19:00',
-        status: 'pending',
-      },
-      {
-        home: 'Paraguay',
-        away: 'Venezuela',
-        homeFlag: '🇵🇾',
-        awayFlag: '🇻🇪',
-        date: '22 JUN 2026',
-        time: '16:00',
-        status: 'pending',
-      },
-    ],
-  },
-  {
-    id: 3,
-    name: 'JORNADA 3',
-    matches: [
-      {
-        home: 'Argentina',
-        away: 'Uruguay',
-        homeFlag: '🇦🇷',
-        awayFlag: '🇺🇾',
-        date: '26 JUN 2026',
-        time: '16:00',
-        status: 'pending',
-      },
-      {
-        home: 'Brasil',
-        away: 'Colombia',
-        homeFlag: '🇧🇷',
-        awayFlag: '🇨🇴',
-        date: '26 JUN 2026',
-        time: '19:00',
-        status: 'pending',
-      },
-      {
-        home: 'Chile',
-        away: 'Ecuador',
-        homeFlag: '🇨🇱',
-        awayFlag: '🇪🇨',
-        date: '27 JUN 2026',
-        time: '16:00',
-        status: 'pending',
-      },
-      {
-        home: 'Perú',
-        away: 'Paraguay',
-        homeFlag: '🇵🇪',
-        awayFlag: '🇵🇾',
-        date: '27 JUN 2026',
-        time: '19:00',
-        status: 'pending',
-      },
-      {
-        home: 'Bolivia',
-        away: 'Venezuela',
-        homeFlag: '🇧🇴',
-        awayFlag: '🇻🇪',
-        date: '28 JUN 2026',
-        time: '16:00',
-        status: 'pending',
-      },
-    ],
-  },
-];
-
-const rules = [
-  {
-    icon: '🎯',
-    title: 'PUNTAJE',
-    description:
-      'Acierta el resultado exacto y obtén 5 puntos. Si aciertas solo el ganador o el empate, sumas 3 puntos. Fallar no suma.',
-  },
-  {
-    icon: '📅',
-    title: 'PLAZOS',
-    description:
-      'Las predicciones se cierran automáticamente 30 minutos antes del inicio de cada partido. No se aceptan cambios después del cierre.',
-  },
-  {
-    icon: '🏆',
-    title: 'BONIFICACIONES',
-    description:
-      'Los usuarios con racha de 3 o más aciertos consecutivos reciben 2 puntos extra por cada acierto durante la racha activa.',
-  },
-  {
-    icon: '⚖️',
-    title: 'DESEMPATES',
-    description:
-      'En caso de igualdad de puntos, se desempata por mayor número de resultados exactos. De persistir, por mejor racha activa.',
-  },
-];
-
-const leaderboard = [
-  { pos: 1, name: 'Martín López', initials: 'ML', points: 47, correct: 12, streak: 5 },
-  { pos: 2, name: 'Camila Rivas', initials: 'CR', points: 42, correct: 10, streak: 3 },
-  { pos: 3, name: 'Javier Mendoza', initials: 'JM', points: 38, correct: 9, streak: 2 },
-  { pos: 4, name: 'Valentina Paz', initials: 'VP', points: 35, correct: 8, streak: 0 },
-  { pos: 5, name: 'Andrés Torres', initials: 'AT', points: 33, correct: 7, streak: 1 },
-  { pos: 6, name: 'Sofía Herrera', initials: 'SH', points: 29, correct: 6, streak: 0 },
-  { pos: 7, name: 'Felipe Rojas', initials: 'FR', points: 26, correct: 5, streak: 0 },
-  { pos: 8, name: 'Isabella Campos', initials: 'IC', points: 22, correct: 4, streak: 1 },
-  { pos: 9, name: 'Diego Muñoz', initials: 'DM', points: 18, correct: 3, streak: 0 },
-  { pos: 10, name: 'Laura Silva', initials: 'LS', points: 14, correct: 2, streak: 0 },
-];
-
-const activeRound = rounds[0];
 ---
 
 <Layout
   title="PICKEM — Predicciones Deportivas"
   description="Plataforma de predicciones deportivas. Registra tus pronósticos, consulta las reglas y sigue la clasificación."
 >
-
-<div class="text-2xl font-bold text-center m-8">
-  <h1 class="">¡Hola Andres! 👋</h1>
-</div>
-  <div class="flex flex-col gap-4 m-4">
+  <div class="text-2xl font-bold text-center pt-8">
+    <h1 class="">¡Hola Andres! 👋</h1>
+  </div>
+  <div class="flex flex-col gap-4">
     <Shadow_container>
       <div class="flex flex-col gap-3 p-2">
         <div class="flex items-center justify-between">
@@ -258,7 +50,9 @@ const activeRound = rounds[0];
         <span class="text-5xl font-bold leading-none tabular-nums">0 pts</span>
 
         <div class="flex justify-end">
-          <a href="#leaderboard" class="text-xs font-semibold tracking-wider uppercase hover:underline"> Ver tabla ></a>
+          <a href="#leaderboard" class="text-xs font-semibold tracking-wider uppercase hover:underline">
+            Ver tabla &gt;</a
+          >
         </div>
       </div>
     </Shadow_container>
