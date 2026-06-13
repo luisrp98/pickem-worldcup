@@ -1,6 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Shadow_container from '../components/Shadow_Container.astro';
+import ShadowContainer from '../components/ShadowContainer.astro';
 
 const thBase =
   'text-xs font-semibold tracking-widest uppercase text-text-secondary text-left px-5 py-3.5 border-b border-border bg-muted';
@@ -29,7 +29,7 @@ const leaderboard = [
   description="Consulta la clasificación actual de los participantes en PICKEM. Sigue tu posición y compite por el primer lugar."
 >
   <div class="max-w-4xl mx-auto">
-    <Shadow_container>
+    <ShadowContainer>
       <table class="w-full border-collapse border border-border">
         <thead>
           <tr>
@@ -78,6 +78,6 @@ const leaderboard = [
           }
         </tbody>
       </table>
-    </Shadow_container>
+    </ShadowContainer>
   </div>
 </Layout>
