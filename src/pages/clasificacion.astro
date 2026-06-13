@@ -1,0 +1,83 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Shadow_container from '../components/Shadow_Container.astro';
+
+const thBase =
+  'text-xs font-semibold tracking-widest uppercase text-text-secondary text-left px-5 py-3.5 border-b border-border bg-muted';
+
+const tdBase = 'px-5 py-3.5 border-b border-border text-sm';
+
+const avatar =
+  'w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-xs font-semibold text-text-secondary shrink-0';
+
+const leaderboard = [
+  { pos: 1, name: 'Martín López', initials: 'ML', points: 47, result: 12, score: 5 },
+  { pos: 2, name: 'Camila Rivas', initials: 'CR', points: 42, result: 11, score: 4 },
+  { pos: 3, name: 'Javier Mendoza', initials: 'JM', points: 38, result: 10, score: 3 },
+  { pos: 4, name: 'Valentina Paz', initials: 'VP', points: 35, result: 10, score: 2 },
+  { pos: 5, name: 'Andrés Torres', initials: 'AT', points: 33, result: 9, score: 2 },
+  { pos: 6, name: 'Sofía Herrera', initials: 'SH', points: 29, result: 8, score: 1 },
+  { pos: 7, name: 'Felipe Rojas', initials: 'FR', points: 26, result: 7, score: 1 },
+  { pos: 8, name: 'Isabella Campos', initials: 'IC', points: 22, result: 6, score: 1 },
+  { pos: 9, name: 'Diego Muñoz', initials: 'DM', points: 18, result: 5, score: 0 },
+  { pos: 10, name: 'Laura Silva', initials: 'LS', points: 14, result: 4, score: 0 },
+];
+---
+
+<Layout
+  title="Clasificación — PICKEM"
+  description="Consulta la clasificación actual de los participantes en PICKEM. Sigue tu posición y compite por el primer lugar."
+>
+  <div class="max-w-4xl mx-auto">
+    <Shadow_container>
+      <table class="w-full border-collapse border border-border">
+        <thead>
+          <tr>
+            <th class={`${thBase} w-14`}>POS</th>
+            <th class={`${thBase} w-14`}></th>
+            <th class={thBase}>USUARIO</th>
+            <th class={`${thBase} w-28 max-sm:hidden`}>ACIERTOS RESULTADO</th>
+            <th class={`${thBase} w-28 max-sm:hidden`}>ACIERTOS MARCADOR</th>
+            <th class={`${thBase} w-16`}>PTS</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            leaderboard.map((entry) => (
+              <tr class={entry.pos <= 3 ? 'bg-muted' : ''}>
+                <td class={tdBase}>
+                  <span
+                    class:list={[
+                      'font-bold text-sm',
+                      entry.pos === 1 && 'text-gold',
+                      entry.pos === 2 && 'text-silver',
+                      entry.pos === 3 && 'text-bronze',
+                      entry.pos > 3 && 'text-text-tertiary',
+                    ]}
+                  >
+                    {entry.pos}
+                  </span>
+                </td>
+                <td class={tdBase}>
+                  <span class={avatar}>{entry.initials}</span>
+                </td>
+                <td class={tdBase}>
+                  <span class="font-semibold text-text">{entry.name}</span>
+                </td>
+                <td class={`${tdBase} max-sm:hidden`}>
+                  <span class="font-medium text-text">{entry.result}</span>
+                </td>
+                <td class={`${tdBase} max-sm:hidden`}>
+                  <span class="font-medium text-text">{entry.score}</span>
+                </td>
+                <td class={tdBase}>
+                  <span class="font-bold text-base text-text">{entry.points}</span>
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </Shadow_container>
+  </div>
+</Layout>
