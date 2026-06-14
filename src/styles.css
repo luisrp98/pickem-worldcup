@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 @theme {
-  --font-sans: 'Space Grotesk', sans-serif;
+  --font-sans: 'Space Grotesk', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
 
   /* Arceus Color Palette
   Gotten from -> https://www.pokemonpalette.com/ */
