@@ -1,9 +1,13 @@
 ---
+import UserMenu from './UserMenu.astro';
+
 const links = [
   { href: '/predicciones', label: 'PREDICCIONES' },
   { href: '/clasificacion', label: 'CLASIFICACIÓN' },
   { href: '/reglas', label: 'REGLAS' },
 ];
+
+const user = Astro.locals.user;
 ---
 
 <header class="z-20
@@ -24,50 +28,54 @@ const links = [
       PICK'EM
     </a>
 
-    <button
-      id="menu-toggle"
-      class="flex
-          text-text-primary
-          transition-colors
-          relative size-10 items-center justify-center hover:text-text-hover-primary
-          sm:hidden"
-      aria-label="Abrir menú"
-    >
-      <svg id="menu-icon-open" class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M3 12h18M3 6h18M3 18h18"></path>
-      </svg>
-      <svg
-        id="menu-icon-close"
-        class="hidden
-            size-6"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-      >
-        <path d="M18 6 6 18M6 6l12 12"></path>
-      </svg>
-    </button>
+    <div class="flex items-center gap-2 sm:gap-3">
+      <nav class="hidden
+          gap-0.5
+          sm:flex">
+        {
+          links.map((link) => (
+            <a
+              href={link.href}
+              class="
+                px-4 py-2
+                text-xs font-medium tracking-widest text-text-secondary
+                transition-colors
+                relative hover:text-text-hover-primary
+              "
+            >
+              {link.label}
+            </a>
+          ))
+        }
+      </nav>
 
-    <nav class="hidden
-        gap-0.5
-        sm:flex">
-      {
-        links.map((link) => (
-          <a
-            href={link.href}
-            class="
-              px-4 py-2
-              text-xs font-medium tracking-widest text-text-secondary
-              transition-colors
-              relative hover:text-text-hover-primary
-            "
-          >
-            {link.label}
-          </a>
-        ))
-      }
-    </nav>
+      {user && <UserMenu email={user.email} />}
+
+      <button
+        id="menu-toggle"
+        class="flex
+            text-text-primary
+            transition-colors
+            relative size-10 items-center justify-center hover:text-text-hover-primary
+            sm:hidden"
+        aria-label="Abrir menú"
+      >
+        <svg id="menu-icon-open" class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12h18M3 6h18M3 18h18"></path>
+        </svg>
+        <svg
+          id="menu-icon-close"
+          class="hidden
+              size-6"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M18 6 6 18M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
 
     <div
       id="mobile-menu"

@@ -1,6 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import ShadowContainer from '../components/ShadowContainer.astro';
+
+const user = Astro.locals.user!;
+const friendlyName = user.email.split('@')[0] ?? user.email;
 ---
 
 <Layout
@@ -8,7 +11,7 @@ import ShadowContainer from '../components/ShadowContainer.astro';
   description="Plataforma de predicciones deportivas. Registra tus pronósticos, consulta las reglas y sigue la clasificación."
 >
   <div class="text-2xl font-bold text-center pt-8">
-    <h1 class="">¡Hola Andres! 👋</h1>
+    <h1 class="">¡Hola {friendlyName}! 👋</h1>
   </div>
   <div class="flex flex-col gap-4">
     <ShadowContainer>

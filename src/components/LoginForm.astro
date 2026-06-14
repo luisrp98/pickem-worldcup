@@ -1,0 +1,169 @@
+---
+import ShadowContainer from './ShadowContainer.astro';
+
+export interface Props {
+  from?: string;
+}
+
+const { from = '/' } = Astro.props;
+---
+
+<ShadowContainer>
+  <form
+    id="login-form"
+    class="flex flex-col gap-4 p-6 md:p-8"
+    data-from={from}
+    novalidate
+  >
+    <div class="flex flex-col gap-1">
+      <label for="email" class="text-xs font-semibold tracking-widest uppercase text-text-secondary">
+        Email
+      </label>
+      <input
+        id="email"
+        name="email"
+        type="email"
+        required
+        autocomplete="email"
+        placeholder="tu@email.com"
+        class="px-3 py-2.5 text-sm border border-border rounded-sm bg-muted text-text outline-none focus:border-text focus:bg-surface transition-[border-color,background] placeholder:text-text-tertiary"
+      />
+    </div>
+
+    <div class="flex flex-col gap-1">
+      <label for="password" class="text-xs font-semibold tracking-widest uppercase text-text-secondary">
+        Contraseña
+      </label>
+      <input
+        id="password"
+        name="password"
+        type="password"
+        required
+        autocomplete="current-password"
+        placeholder="••••••••"
+        class="px-3 py-2.5 text-sm border border-border rounded-sm bg-muted text-text outline-none focus:border-text focus:bg-surface transition-[border-color,background] placeholder:text-text-tertiary"
+      />
+    </div>
+
+    <p
+      id="login-error"
+      class="hidden text-sm text-red-600 font-medium"
+      role="alert"
+      aria-live="polite"
+    >
+    </p>
+
+    <button
+      id="login-submit"
+      type="submit"
+      class="mt-2 px-6 py-3 bg-arceus-accent-500 text-arceus-secondary-950 rounded-sm font-bold uppercase tracking-widest text-xs hover:bg-arceus-accent-600 active:bg-arceus-accent-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+    >
+      <span data-label>Iniciar sesión</span>
+      <span data-spinner class="hidden">Ingresando…</span>
+    </button>
+
+    <a
+      href="/reglas"
+      class="text-xs text-text-tertiary text-center mt-1 hover:text-text-secondary hover:underline"
+    >
+      ¿Cómo se juega? <span aria-hidden="true">→</span>
+    </a>
+  </form>
+</ShadowContainer>
+
+<script>
+  import { initializeApp, getApps, getApp } from 'firebase/app';
+  import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+
+  const firebaseConfig = {
+    apiKey: import.meta.env.PUBLIC_FIREBASE_API_KEY,
+    authDomain: import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.PUBLIC_FIREBASE_APP_ID,
+  };
+
+  const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  const ERROR_MESSAGES: Record<string, string> = {
+    'auth/invalid-credential': 'Email o contraseña incorrectos.',
+    'auth/invalid-email': 'El formato del email no es válido.',
+    'auth/user-disabled': 'Esta cuenta está deshabilitada.',
+    'auth/user-not-found': 'No existe una cuenta con ese email.',
+    'auth/wrong-password': 'Contraseña incorrecta.',
+    'auth/too-many-requests': 'Demasiados intentos. Probá de nuevo en unos minutos.',
+    'auth/network-request-failed': 'Error de red. Revisá tu conexión.',
+    'auth/missing-password': 'Ingresá tu contraseña.',
+  };
+
+  function getErrorMessage(code: string | undefined): string {
+    if (!code) return 'No se pudo iniciar sesión. Intentá de nuevo.';
+    return ERROR_MESSAGES[code] ?? 'No se pudo iniciar sesión. Intentá de nuevo.';
+  }
+
+  function init() {
+    const form = document.getElementById('login-form') as HTMLFormElement | null;
+    if (!form) return;
+    const errorEl = document.getElementById('login-error') as HTMLParagraphElement | null;
+    const submitBtn = document.getElementById('login-submit') as HTMLButtonElement | null;
+    const labelEl = submitBtn?.querySelector<HTMLSpanElement>('[data-label]');
+    const spinnerEl = submitBtn?.querySelector<HTMLSpanElement>('[data-spinner]');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!errorEl || !submitBtn || !labelEl || !spinnerEl) return;
+
+      errorEl.classList.add('hidden');
+      errorEl.textContent = '';
+
+      const formData = new FormData(form);
+      const email = String(formData.get('email') ?? '').trim();
+      const password = String(formData.get('password') ?? '');
+
+      if (!email || !password) {
+        errorEl.textContent = 'Ingresá email y contraseña.';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      labelEl.classList.add('hidden');
+      spinnerEl.classList.remove('hidden');
+
+      try {
+        const credential = await signInWithEmailAndPassword(auth, email, password);
+        const idToken = await credential.user.getIdToken();
+
+        const res = await fetch('/api/auth/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken }),
+        });
+
+        if (!res.ok) {
+          const data = (await res.json().catch(() => ({}))) as { error?: string };
+          throw new Error(data.error ?? 'session-failed');
+        }
+
+        const from = form.dataset.from && form.dataset.from !== '/' ? form.dataset.from : '/';
+        window.location.replace(from);
+      } catch (err) {
+        const code = (err as { code?: string }).code;
+        const message = code ? getErrorMessage(code) : getErrorMessage((err as Error).message);
+        errorEl.textContent = message;
+        errorEl.classList.remove('hidden');
+        submitBtn.disabled = false;
+        labelEl.classList.remove('hidden');
+        spinnerEl.classList.add('hidden');
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+</script>

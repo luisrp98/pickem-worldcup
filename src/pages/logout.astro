@@ -1,0 +1,12 @@
+---
+export const prerender = false;
+
+import { clearSession } from '../lib/firebase/session';
+
+if (Astro.request.method === 'POST') {
+  clearSession(Astro.cookies);
+  return Astro.redirect('/login');
+}
+
+return Astro.redirect('/');
+---
