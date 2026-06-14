@@ -17,6 +17,7 @@
     "@astrojs/vercel": "^10.0.8",
     "@tailwindcss/postcss": "^4.3.0",
     "astro": "^6.4.6",
+    "dotenv": "^17.4.2",
     "firebase": "^12.14.0",
     "firebase-admin": "^14.0.0",
     "tailwindcss": "^4.3.0"

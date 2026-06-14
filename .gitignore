@@ -24,3 +24,6 @@ pnpm-debug.log*
 .idea/
 
 .vercel/
+
+# npm lockfile (functions/ uses npm, root uses pnpm)
+package-lock.json
