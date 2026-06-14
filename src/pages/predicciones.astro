@@ -34,18 +34,23 @@ import Layout from '../layouts/Layout.astro';
     renderMatchday,
     refreshMatchInDom,
     type Match,
+    type Prediction,
   } from '../lib/matches';
 
   const POLL_MS = 5 * 60 * 1000;
+  const PREDICTIONS_API = '/api/predictions/day';
 
-  function renderAll(matches: Match[]) {
+  type PredictionsMap = Record<string, Prediction>;
+
+  function renderAll(matches: Match[], predictions: PredictionsMap) {
     const container = document.querySelector<HTMLElement>('[data-accordion]');
     if (!container) return;
     const grouped = groupByDate(matches);
     const dates = [...grouped.keys()].sort();
     container.innerHTML = dates
-      .map((date, idx) => renderMatchday(date, idx + 1, grouped.get(date) ?? []))
+      .map((date, idx) => renderMatchday(date, idx + 1, grouped.get(date) ?? [], predictions))
       .join('');
+    attachSaveHandlers();
   }
 
   function updateAll(matches: Match[]) {
@@ -57,10 +62,115 @@ import Layout from '../layouts/Layout.astro';
     }
   }
 
+  async function fetchPredictions(): Promise<PredictionsMap> {
+    try {
+      const res = await fetch(PREDICTIONS_API, { cache: 'no-store' });
+      if (!res.ok) return {};
+      const data = (await res.json()) as { predictions: Record<string, Prediction> };
+      const out: PredictionsMap = {};
+      for (const [id, p] of Object.entries(data.predictions)) {
+        if (typeof p.score1 === 'number' && typeof p.score2 === 'number') {
+          out[id] = { score1: p.score1, score2: p.score2 };
+        }
+      }
+      return out;
+    } catch {
+      return {};
+    }
+  }
+
+  function readMatchInputsFromDom(item: HTMLElement): PredictionsMap {
+    const out: PredictionsMap = {};
+    const matches = item.querySelectorAll<HTMLElement>('[data-match-id]');
+    for (const m of matches) {
+      const id = m.dataset.matchId;
+      if (!id) continue;
+      const home = m.querySelector<HTMLInputElement>('[data-score-home]');
+      const away = m.querySelector<HTMLInputElement>('[data-score-away]');
+      if (!home || !away) continue;
+      const score1 = parseInt(home.value, 10);
+      const score2 = parseInt(away.value, 10);
+      if (Number.isFinite(score1) && Number.isFinite(score2)) {
+        out[id] = { score1, score2 };
+      }
+    }
+    return out;
+  }
+
+  function markDayDirty(item: HTMLElement) {
+    const indicator = item.querySelector<HTMLElement>('[data-dirty-indicator]');
+    const status = item.querySelector<HTMLElement>('[data-save-status]');
+    const btn = item.querySelector<HTMLButtonElement>('[data-save-day]');
+    if (btn) btn.disabled = false;
+    if (indicator) indicator.classList.remove('hidden');
+    if (status) {
+      status.textContent = 'Cambios sin guardar';
+      status.classList.remove('hidden');
+      status.classList.add('text-text-tertiary');
+      status.classList.remove('text-arceus-accent-700');
+    }
+  }
+
+  function markDayClean(item: HTMLElement) {
+    const indicators = item.querySelectorAll<HTMLElement>('[data-dirty-indicator]');
+    indicators.forEach((i) => i.classList.add('hidden'));
+    const status = item.querySelector<HTMLElement>('[data-save-status]');
+    const btn = item.querySelector<HTMLButtonElement>('[data-save-day]');
+    if (status) {
+      status.textContent = 'Guardado';
+      status.classList.remove('hidden');
+      status.classList.remove('text-text-tertiary');
+      status.classList.add('text-arceus-accent-700');
+      setTimeout(() => status.classList.add('hidden'), 2000);
+    }
+    if (btn) btn.disabled = true;
+  }
+
+  function attachSaveHandlers() {
+    const items = document.querySelectorAll<HTMLElement>('[data-accordion-item]');
+    items.forEach((item) => {
+      const inputs = item.querySelectorAll<HTMLInputElement>('input[type="number"]');
+      inputs.forEach((input) => {
+        input.addEventListener('input', () => markDayDirty(item));
+      });
+
+      const btn = item.querySelector<HTMLButtonElement>('[data-save-day]');
+      if (!btn) return;
+      btn.addEventListener('click', async () => {
+        const date = item.dataset.dayDate;
+        if (!date) return;
+        const predictions = readMatchInputsFromDom(item);
+        const arr = Object.entries(predictions).map(([matchId, p]) => ({
+          matchId,
+          score1: p.score1,
+          score2: p.score2,
+        }));
+        btn.disabled = true;
+        try {
+          const res = await fetch(PREDICTIONS_API, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ date, predictions: arr }),
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          markDayClean(item);
+        } catch (err) {
+          console.error('save day failed', err);
+          const status = item.querySelector<HTMLElement>('[data-save-status]');
+          if (status) {
+            status.textContent = 'Error al guardar';
+            status.classList.remove('hidden');
+          }
+          btn.disabled = false;
+        }
+      });
+    });
+  }
+
   async function load() {
     try {
-      const data = await fetchMatches();
-      renderAll(data.matches);
+      const [data, predictions] = await Promise.all([fetchMatches(), fetchPredictions()]);
+      renderAll(data.matches, predictions);
     } catch (err) {
       const container = document.querySelector<HTMLElement>('[data-accordion]');
       if (container) {
