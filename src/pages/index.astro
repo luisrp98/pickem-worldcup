@@ -15,31 +15,13 @@ import ShadowContainer from '../components/ShadowContainer.astro';
       <div class="flex flex-col gap-3 p-2">
         <div class="flex items-center justify-between">
           <h2>Proximos partidos</h2>
-          <p>1 día 12 horas 30 minutos</p>
+          <p data-countdown>—</p>
         </div>
 
         <hr class="border-t border-bg-secondary/40" />
-        <!-- #region This is gonna be changing dynamically as soon we got the data -->
-        <div class="flex items-center justify-between gap-2 w-full tabular-nums">
-          <span>🏳️</span>
-          <span>Local</span>
-          <span class="w-6 text-center">0</span>
-          <span>-</span>
-          <span class="w-6 text-center">0</span>
-          <span>Visitante</span>
-          <span>🏳️</span>
+        <div class="flex flex-col gap-2" data-upcoming>
+          <p class="text-sm text-text-tertiary py-4 text-center" data-loading>Cargando…</p>
         </div>
-
-        <div class="flex items-center justify-between gap-2 w-full tabular-nums">
-          <span>🏳️</span>
-          <span>Local</span>
-          <span class="w-6 text-center">0</span>
-          <span>-</span>
-          <span class="w-6 text-center">0</span>
-          <span>Visitante</span>
-          <span>🏳️</span>
-        </div>
-        <!-- #endregion -->
       </div>
     </ShadowContainer>
 
@@ -58,3 +40,109 @@ import ShadowContainer from '../components/ShadowContainer.astro';
     </ShadowContainer>
   </div>
 </Layout>
+
+<script>
+  import {
+    fetchMatches,
+    getMatchStatus,
+    parseKickoff,
+    renderUpcomingMatch,
+    refreshMatchInDom,
+    type Match,
+  } from '../lib/matches';
+
+  const POLL_MS = 5 * 60 * 1000;
+  const UPCOMING_LIMIT = 3;
+
+  function formatCountdown(target: Date, now: Date): string {
+    const ms = target.getTime() - now.getTime();
+    if (ms <= 0) return 'EN JUEGO';
+    const totalMin = Math.floor(ms / 60000);
+    const days = Math.floor(totalMin / (60 * 24));
+    const hours = Math.floor((totalMin % (60 * 24)) / 60);
+    const mins = totalMin % 60;
+    if (days > 0) return `${days}d ${hours}h ${mins}m`;
+    if (hours > 0) return `${hours}h ${mins}m`;
+    return `${mins}m`;
+  }
+
+  function pickUpcoming(matches: Match[], now: Date, limit: number): Match[] {
+    const pending = matches
+      .map((m) => ({ match: m, kickoff: parseKickoff(m) }))
+      .filter(
+        (x) =>
+          x.kickoff !== null &&
+          getMatchStatus(x.match, now) === 'pending' &&
+          x.kickoff.getTime() > now.getTime()
+      )
+      .sort((a, b) => (a.kickoff as Date).getTime() - (b.kickoff as Date).getTime());
+    return pending.slice(0, limit).map((x) => x.match);
+  }
+
+  function render(matches: Match[]) {
+    const container = document.querySelector<HTMLElement>('[data-upcoming]');
+    if (!container) return;
+    const upcoming = pickUpcoming(matches, new Date(), UPCOMING_LIMIT);
+    if (upcoming.length === 0) {
+      container.innerHTML =
+        '<p class="text-sm text-text-tertiary py-4 text-center">No hay partidos próximos.</p>';
+      return;
+    }
+    container.innerHTML = upcoming.map(renderUpcomingMatch).join('');
+  }
+
+  function updateCountdown(matches: Match[], now: Date) {
+    const el = document.querySelector<HTMLElement>('[data-countdown]');
+    if (!el) return;
+    const next = matches
+      .map((m) => parseKickoff(m))
+      .filter((d): d is Date => d !== null && d.getTime() > now.getTime())
+      .sort((a, b) => a.getTime() - b.getTime())[0];
+    if (!next) {
+      el.textContent = '—';
+      return;
+    }
+    el.textContent = formatCountdown(next, now);
+  }
+
+  async function load() {
+    try {
+      const data = await fetchMatches();
+      render(data.matches);
+      const tick = () => updateCountdown(data.matches, new Date());
+      tick();
+      setInterval(tick, 60 * 1000);
+    } catch (err) {
+      const container = document.querySelector<HTMLElement>('[data-upcoming]');
+      if (container) {
+        container.innerHTML =
+          '<p class="text-sm text-text-tertiary py-4 text-center">No se pudieron cargar los partidos.</p>';
+      }
+      console.error('load upcoming failed', err);
+    }
+  }
+
+  async function refresh() {
+    try {
+      const data = await fetchMatches();
+      const now = new Date();
+      const hasLive = data.matches.some((m) => getMatchStatus(m, now) === 'live');
+      if (hasLive) {
+        for (const m of data.matches) {
+          const status = getMatchStatus(m, now);
+          if (status === 'live' || status === 'closed') refreshMatchInDom(m);
+        }
+      }
+    } catch (err) {
+      console.error('refresh upcoming failed', err);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', load);
+  } else {
+    load();
+  }
+
+  setInterval(refresh, POLL_MS);
+</script>

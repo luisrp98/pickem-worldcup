@@ -1,0 +1,79 @@
+---
+export type MatchStatus = 'pending' | 'live' | 'closed';
+
+export interface Props {
+  home: string;
+  away: string;
+  homeFlag: string;
+  awayFlag: string;
+  status: MatchStatus;
+  time?: string;
+}
+
+const { home, away, homeFlag, awayFlag, status, time } = Astro.props;
+
+const statusLabel: Record<MatchStatus, string> = {
+  pending: 'PENDIENTE',
+  live: 'EN JUEGO',
+  closed: 'CERRADO',
+};
+
+const statusClasses: Record<MatchStatus, string> = {
+  pending: 'bg-muted text-text-tertiary border border-border',
+  live: 'bg-arceus-accent-400 text-arceus-secondary-950 border border-arceus-accent-500',
+  closed: 'bg-arceus-secondary-950 text-arceus-primary-50 border border-arceus-secondary-950',
+};
+
+const inputsDisabled = status === 'closed';
+---
+
+<div class="flex flex-col gap-2 py-3 first:pt-0 last:pb-0">
+  <div class="flex items-center justify-between gap-2 w-full">
+    <div class="flex items-center gap-2 flex-1 min-w-0">
+      <span class="text-xl leading-none shrink-0" aria-hidden="true">{homeFlag}</span>
+      <span class="text-sm font-semibold text-text truncate">{home}</span>
+    </div>
+
+    <div class="flex items-center gap-1.5 shrink-0">
+      <input
+        type="number"
+        min="0"
+        max="30"
+        step="1"
+        placeholder="-"
+        disabled={inputsDisabled}
+        aria-label={`Goles de ${home}`}
+        class="w-9 h-10 text-center text-base font-semibold border border-border rounded-sm bg-muted text-text outline-none focus:border-text focus:bg-surface transition-[border-color,background] appearance-none [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none placeholder:text-text-tertiary disabled:opacity-50 disabled:cursor-not-allowed"
+      />
+      <span class="text-sm font-light text-text-tertiary">:</span>
+      <input
+        type="number"
+        min="0"
+        max="30"
+        step="1"
+        placeholder="-"
+        disabled={inputsDisabled}
+        aria-label={`Goles de ${away}`}
+        class="w-9 h-10 text-center text-base font-semibold border border-border rounded-sm bg-muted text-text outline-none focus:border-text focus:bg-surface transition-[border-color,background] appearance-none [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none placeholder:text-text-tertiary disabled:opacity-50 disabled:cursor-not-allowed"
+      />
+    </div>
+
+    <div class="flex items-center gap-2 flex-1 min-w-0 justify-end">
+      <span class="text-sm font-semibold text-text truncate">{away}</span>
+      <span class="text-xl leading-none shrink-0" aria-hidden="true">{awayFlag}</span>
+    </div>
+  </div>
+
+  <div class="flex items-center justify-between gap-2">
+    {time && <span class="text-xs text-text-tertiary tabular-nums tracking-wide">{time}</span>}
+    {!time && <span />}
+    <span
+      class:list={[
+        'text-[0.625rem] font-semibold tracking-widest uppercase px-2 py-0.5 rounded-xs',
+        statusClasses[status],
+      ]}
+    >
+      {statusLabel[status]}
+    </span>
+  </div>
+</div>
