@@ -1,8 +1,10 @@
 import { initializeApp, getApps, cert, type App } from 'firebase-admin/app';
 import { getAuth, type Auth } from 'firebase-admin/auth';
+import { getFirestore, type Firestore } from 'firebase-admin/firestore';
 
 let adminApp: App | undefined;
 let adminAuth: Auth | undefined;
+let adminDb: Firestore | undefined;
 
 function getAdminApp(): App {
   if (adminApp) return adminApp;
@@ -13,7 +15,7 @@ function getAdminApp(): App {
 
   if (!projectId || !clientEmail || !privateKeyRaw) {
     throw new Error(
-      'Missing Firebase Admin credentials. Set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL and FIREBASE_PRIVATE_KEY.'
+      'Missing Firebase Admin credentials. Set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL and FIREBASE_PRIVATE_KEY.',
     );
   }
 
@@ -35,4 +37,11 @@ export function getAdminAuth(): Auth {
     adminAuth = getAuth(getAdminApp());
   }
   return adminAuth;
+}
+
+export function getAdminFirestore(): Firestore {
+  if (!adminDb) {
+    adminDb = getFirestore(getAdminApp());
+  }
+  return adminDb;
 }

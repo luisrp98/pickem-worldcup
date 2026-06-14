@@ -14,6 +14,7 @@ export interface Score {
 }
 
 export interface Match {
+  id: string;
   num?: number;
   round: string;
   date: string;
@@ -34,13 +35,13 @@ export interface Tournament {
 
 export type MatchStatus = 'pending' | 'live' | 'closed';
 
-export const MATCHES_URL =
-  'https://raw.githubusercontent.com/upbound-web/worldcup-live.json/master/2026/worldcup.json';
+export const SYNC_API_URL = '/api/sync';
 
 export async function fetchMatches(signal?: AbortSignal): Promise<Tournament> {
-  const res = await fetch(MATCHES_URL, { cache: 'no-store', signal });
-  if (!res.ok) throw new Error(`Failed to fetch matches: ${res.status}`);
-  return (await res.json()) as Tournament;
+  const res = await fetch(SYNC_API_URL, { cache: 'no-store', signal });
+  if (!res.ok) throw new Error(`Failed to sync matches: ${res.status}`);
+  const payload = (await res.json()) as { tournament: Tournament };
+  return payload.tournament;
 }
 
 export function parseKickoff(match: Match): Date | null {
@@ -54,8 +55,7 @@ export function parseKickoff(match: Match): Date | null {
 
   const [, h, min] = m;
   const [yyyy, mm, dd] = match.date.split('-').map(Number);
-  const utcMillis =
-    Date.UTC(yyyy, mm - 1, dd, Number(h), Number(min)) - offsetHours * 3600 * 1000;
+  const utcMillis = Date.UTC(yyyy, mm - 1, dd, Number(h), Number(min)) - offsetHours * 3600 * 1000;
   return new Date(utcMillis);
 }
 
@@ -97,7 +97,7 @@ export const FLAGS: Record<string, string> = {
   Australia: '🇦🇺',
   Turkey: '🇹🇷',
   Germany: '🇩🇪',
-  'Curaçao': '🇨🇼',
+  Curaçao: '🇨🇼',
   'Ivory Coast': '🇨🇮',
   Ecuador: '🇪🇨',
   Netherlands: '🇳🇱',
@@ -152,7 +152,7 @@ export const TEAM_TO_ISO: Record<string, string> = {
   Australia: 'au',
   Turkey: 'tr',
   Germany: 'de',
-  'Curaçao': 'cw',
+  Curaçao: 'cw',
   'Ivory Coast': 'ci',
   Ecuador: 'ec',
   Netherlands: 'nl',
@@ -227,7 +227,7 @@ const STATUS_CLASSES: Record<MatchStatus, string> = {
 };
 
 const INPUT_CLASS =
-  'w-9 h-10 text-center text-base font-semibold border border-border rounded-sm bg-muted text-text outline-none focus:border-text focus:bg-surface transition-[border-color,background] appearance-none [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none placeholder:text-text-tertiary disabled:opacity-50 disabled:cursor-not-allowed';
+  'w-9 h-10 text-center text-base font-semibold border border-border rounded-sm bg-white text-text outline-none focus:border-text focus:bg-surface transition-[border-color,background] appearance-none [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none placeholder:text-text-tertiary disabled:bg-muted disabled:opacity-60 disabled:cursor-not-allowed';
 
 function escapeHtml(s: string): string {
   return s
@@ -239,12 +239,46 @@ function escapeHtml(s: string): string {
 }
 
 export function matchId(match: Match): string {
-  return `${match.date}|${match.team1}|${match.team2}`;
+  return match.id;
 }
 
-export function renderMatchday(dateISO: string, dayNumber: number, matches: Match[]): string {
+export interface Prediction {
+  score1: number;
+  score2: number;
+}
+
+export interface MatchPoints {
+  points: number;
+  resultado: boolean;
+  marcador: boolean;
+}
+
+export function calculateMatchPoints(match: Match, prediction: Prediction | null | undefined): MatchPoints | null {
+  if (!match.score?.ft) return null;
+  const [real1, real2] = match.score.ft;
+  const result = real1 === real2 ? 'draw' : real1 > real2 ? 'home' : 'away';
+
+  if (!prediction) {
+    return { points: 0, resultado: false, marcador: false };
+  }
+
+  const predResult =
+    prediction.score1 === prediction.score2 ? 'draw' : prediction.score1 > prediction.score2 ? 'home' : 'away';
+
+  const resultado = result === predResult;
+  const marcador = prediction.score1 === real1 && prediction.score2 === real2;
+  const points = (resultado ? 2 : 0) + (marcador ? 5 : 0);
+  return { points, resultado, marcador };
+}
+
+export function renderMatchday(
+  dateISO: string,
+  dayNumber: number,
+  matches: Match[],
+  predictions: Record<string, Prediction> = {},
+): string {
   return `
-    <section class="bg-surface border border-border rounded-md overflow-hidden hover:border-border-strong transition-colors" data-accordion-item>
+    <section class="bg-surface border border-border rounded-md overflow-hidden hover:border-border-strong transition-colors" data-accordion-item data-day-date="${escapeHtml(dateISO)}">
       <button type="button" class="w-full flex items-center justify-between gap-4 px-5 py-4 text-left cursor-pointer" aria-expanded="false" aria-controls="day-panel-${dayNumber}" data-accordion-trigger>
         <div class="flex flex-col gap-0.5 min-w-0">
           <span class="text-xl md:text-2xl font-bold leading-tight tracking-wide truncate">${escapeHtml(formatMatchdayDate(dateISO))}</span>
@@ -257,7 +291,11 @@ export function renderMatchday(dateISO: string, dayNumber: number, matches: Matc
       <div id="day-panel-${dayNumber}" class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out" data-accordion-panel>
         <div class="overflow-hidden">
           <div class="px-5 pb-2 divide-y divide-border/60">
-            ${matches.map(renderMatch).join('')}
+            ${matches.map((m) => renderMatch(m, predictions[m.id] ?? null)).join('')}
+          </div>
+          <div class="px-5 pb-4 pt-2 flex items-center justify-end gap-3" data-day-actions>
+            <span class="text-xs text-text-tertiary hidden" data-save-status></span>
+            <button type="button" class="text-xs font-semibold tracking-wider uppercase px-4 py-2 rounded-sm bg-arceus-secondary-950 text-arceus-primary-50 hover:bg-arceus-secondary-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-arceus-secondary-950" data-save-day disabled>Guardar día</button>
           </div>
         </div>
       </div>
@@ -265,12 +303,21 @@ export function renderMatchday(dateISO: string, dayNumber: number, matches: Matc
   `;
 }
 
-export function renderMatch(match: Match): string {
+export function renderMatch(match: Match, prediction: Prediction | null = null): string {
   const status = getMatchStatus(match);
   const ft = match.score?.ft;
   const disabled = status === 'closed' ? 'disabled' : '';
   const valueAttr = (n?: number) => (typeof n === 'number' ? `value="${n}"` : '');
-  const id = matchId(match);
+  const id = match.id;
+  const homeValue = prediction?.score1;
+  const awayValue = prediction?.score2;
+
+  const points = calculateMatchPoints(match, prediction);
+  const showRealScore = ft && (status === 'closed' || status === 'live');
+  const realScoreHtml = showRealScore
+    ? `<div class="flex items-center justify-center gap-1.5 text-xs text-text-tertiary tabular-nums"><span>${escapeHtml(match.team1)}</span><span class="font-semibold text-text">${ft![0]} - ${ft![1]}</span><span>${escapeHtml(match.team2)}</span></div>`
+    : '';
+  const pointsHtml = status === 'closed' && points ? pointsTextHtml(points) : '';
 
   return `
     <div class="flex flex-col gap-2 py-3 first:pt-0 last:pb-0" data-match-id="${escapeHtml(id)}">
@@ -280,9 +327,10 @@ export function renderMatch(match: Match): string {
           <span class="text-sm font-semibold text-text truncate">${escapeHtml(match.team1)}</span>
         </div>
         <div class="flex items-center gap-1.5 shrink-0">
-          <input type="number" min="0" max="30" step="1" placeholder="-" ${disabled} ${valueAttr(ft?.[0])} aria-label="Goles de ${escapeHtml(match.team1)}" data-score-home class="${INPUT_CLASS}" />
+          <input type="number" min="0" max="30" step="1" placeholder="0" ${disabled} ${valueAttr(homeValue)} aria-label="Goles de ${escapeHtml(match.team1)}" data-score-home class="${INPUT_CLASS}" />
           <span class="text-sm font-light text-text-tertiary">:</span>
-          <input type="number" min="0" max="30" step="1" placeholder="-" ${disabled} ${valueAttr(ft?.[1])} aria-label="Goles de ${escapeHtml(match.team2)}" data-score-away class="${INPUT_CLASS}" />
+          <input type="number" min="0" max="30" step="1" placeholder="0" ${disabled} ${valueAttr(awayValue)} aria-label="Goles de ${escapeHtml(match.team2)}" data-score-away class="${INPUT_CLASS}" />
+          <span class="size-1.5 rounded-full bg-arceus-accent-500 hidden shrink-0" data-dirty-indicator aria-hidden="true"></span>
         </div>
         <div class="flex items-center gap-2 flex-1 min-w-0 justify-end">
           <span class="text-sm font-semibold text-text truncate">${escapeHtml(match.team2)}</span>
@@ -293,8 +341,20 @@ export function renderMatch(match: Match): string {
         <span class="text-xs text-text-tertiary tabular-nums tracking-wide">${escapeHtml(match.time)}</span>
         <span class="text-[0.625rem] font-semibold tracking-widest uppercase px-2 py-0.5 rounded-xs ${STATUS_CLASSES[status]}" data-status>${STATUS_LABEL[status]}</span>
       </div>
+      ${realScoreHtml}
+      ${pointsHtml}
     </div>
   `;
+}
+
+function pointsTextHtml(points: MatchPoints): string {
+  const parts: string[] = [];
+  if (points.resultado) parts.push('+2 resultado');
+  if (points.marcador) parts.push('+5 marcador');
+  if (parts.length === 0) {
+    return '<div class="text-xs text-text-tertiary text-center tabular-nums">0 pts</div>';
+  }
+  return `<div class="text-xs text-arceus-accent-700 text-center font-semibold tabular-nums">${parts.join(' ')}</div>`;
 }
 
 export function renderUpcomingMatch(match: Match): string {
@@ -305,7 +365,7 @@ export function renderUpcomingMatch(match: Match): string {
   const opacity = status === 'closed' ? 'opacity-60' : '';
 
   return `
-    <div class="flex items-center justify-between gap-2 w-full tabular-nums ${opacity}" data-match-id="${escapeHtml(matchId(match))}">
+    <div class="flex items-center justify-between gap-2 w-full tabular-nums ${opacity}" data-match-id="${escapeHtml(match.id)}">
       <span class="shrink-0 inline-flex" aria-hidden="true">${flagImgHtml(match.team1)}</span>
       <span class="text-sm font-medium truncate flex-1 min-w-0">${escapeHtml(match.team1)}</span>
       <span class="w-6 text-center font-semibold tabular-nums" data-score-home>${homeScore}</span>
@@ -318,9 +378,7 @@ export function renderUpcomingMatch(match: Match): string {
 }
 
 export function refreshMatchInDom(match: Match): void {
-  const el = document.querySelector<HTMLElement>(
-    `[data-match-id="${CSS.escape(matchId(match))}"]`
-  );
+  const el = document.querySelector<HTMLElement>(`[data-match-id="${CSS.escape(match.id)}"]`);
   if (!el) return;
 
   const status = getMatchStatus(match);
