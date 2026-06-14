@@ -6,3 +6,5 @@ allowBuilds:
 
 nodeLinker: hoisted
 packageImportMethod: copy
+overrides:
+  jwks-rsa: 3.1.0
