@@ -1,5 +1,5 @@
 ---
-import { TEAM_TO_ISO } from '../../lib/matches';
+import { teamToIso } from '../../lib/matches';
 
 export interface Props {
   team: string;
@@ -7,7 +7,7 @@ export interface Props {
 }
 
 const { team, class: className } = Astro.props;
-const code = TEAM_TO_ISO[team];
+const code = teamToIso[team];
 const wrapperClass = ['shrink-0 inline-flex', className];
 ---
 
