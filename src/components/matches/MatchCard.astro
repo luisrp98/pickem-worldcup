@@ -1,0 +1,93 @@
+---
+import type { Match, Prediction } from '../../lib/matches';
+import { getMatchStatus, calculateMatchPoints } from '../../lib/matches';
+import Flag from './Flag.astro';
+import StatusBadge from './StatusBadge.astro';
+
+export interface Props {
+  match: Match;
+  prediction?: Prediction | null;
+}
+
+const { match, prediction = null } = Astro.props;
+
+const status = getMatchStatus(match);
+const ft = match.score?.ft;
+const disabled = status === 'closed';
+const homeValue = prediction?.score1;
+const awayValue = prediction?.score2;
+const points = calculateMatchPoints(match, prediction);
+const showRealScore = ft && (status === 'closed' || status === 'live');
+const showPoints = status === 'closed' && points;
+
+const inputClass =
+  'w-9 h-10 text-center text-base font-semibold border border-border rounded-sm bg-white text-text outline-none focus:border-text focus:bg-surface transition-[border-color,background] appearance-none [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none placeholder:text-text-tertiary disabled:bg-muted disabled:opacity-60 disabled:cursor-not-allowed';
+---
+
+<div class="flex flex-col gap-2 py-3 first:pt-0 last:pb-0" data-match-id={match.id}>
+  <div class="flex items-center justify-between gap-2 w-full">
+    <div class="flex items-center gap-2 flex-1 min-w-0">
+      <Flag team={match.team1} />
+      <span class="text-sm font-semibold text-text truncate">{match.team1}</span>
+    </div>
+    <div class="flex items-center gap-1.5 shrink-0">
+      <input
+        type="number"
+        min="0"
+        max="30"
+        step="1"
+        placeholder="0"
+        disabled={disabled}
+        value={homeValue}
+        aria-label={`Goles de ${match.team1}`}
+        data-score-home
+        class={inputClass}
+      />
+      <span class="text-sm font-light text-text-tertiary" aria-hidden="true">:</span>
+      <input
+        type="number"
+        min="0"
+        max="30"
+        step="1"
+        placeholder="0"
+        disabled={disabled}
+        value={awayValue}
+        aria-label={`Goles de ${match.team2}`}
+        data-score-away
+        class={inputClass}
+      />
+      <span class="size-1.5 rounded-full bg-arceus-accent-500 hidden shrink-0" data-dirty-indicator aria-hidden="true"
+      ></span>
+    </div>
+    <div class="flex items-center gap-2 flex-1 min-w-0 justify-end">
+      <span class="text-sm font-semibold text-text truncate">{match.team2}</span>
+      <Flag team={match.team2} />
+    </div>
+  </div>
+  <div class="flex items-center justify-between gap-2">
+    <span class="text-xs text-text-tertiary tabular-nums tracking-wide">{match.time}</span>
+    <StatusBadge status={status} />
+  </div>
+  {
+    showRealScore && ft && (
+      <div class="flex items-center justify-center gap-1.5 text-xs text-text-tertiary tabular-nums">
+        <span>{match.team1}</span>
+        <span class="font-semibold text-text">
+          {ft[0]} - {ft[1]}
+        </span>
+        <span>{match.team2}</span>
+      </div>
+    )
+  }
+  {
+    showPoints &&
+      (points.resultado || points.marcador ? (
+        <div class="text-xs text-arceus-accent-700 text-center font-semibold tabular-nums">
+          {points.resultado && <span>+2 resultado </span>}
+          {points.marcador && <span>+5 marcador</span>}
+        </div>
+      ) : (
+        <div class="text-xs text-text-tertiary text-center tabular-nums">0 pts</div>
+      ))
+  }
+</div>

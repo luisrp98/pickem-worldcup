@@ -1,0 +1,31 @@
+---
+import type { MatchStatus } from '../../lib/matches';
+
+export interface Props {
+  status: MatchStatus;
+  class?: string;
+}
+
+const { status, class: className } = Astro.props;
+
+const label = status === 'pending' ? 'PENDIENTE' : status === 'live' ? 'EN JUEGO' : 'CERRADO';
+
+const variantClass =
+  status === 'pending'
+    ? 'bg-muted text-text-tertiary border border-border'
+    : status === 'live'
+      ? 'bg-arceus-accent-400 text-arceus-secondary-950 border border-arceus-accent-500'
+      : 'bg-arceus-secondary-950 text-arceus-primary-50 border border-arceus-secondary-950';
+---
+
+<span
+  class:list={[
+    'text-[0.625rem] font-semibold tracking-widest uppercase px-2 py-0.5 rounded-xs inline-block',
+    variantClass,
+    className,
+  ]}
+  role="status"
+  aria-label={`Estado del partido: ${label}`}
+>
+  {label}
+</span>

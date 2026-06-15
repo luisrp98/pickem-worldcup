@@ -1,0 +1,31 @@
+---
+import { TEAM_TO_ISO } from '../../lib/matches';
+
+export interface Props {
+  team: string;
+  class?: string;
+}
+
+const { team, class: className } = Astro.props;
+const code = TEAM_TO_ISO[team];
+const wrapperClass = ['shrink-0 inline-flex', className];
+---
+
+{
+  code ? (
+    <img
+      src={`https://flagcdn.com/w40/${code}.png`}
+      alt=""
+      width="24"
+      height="18"
+      loading="lazy"
+      decoding="async"
+      referrerpolicy="no-referrer"
+      class:list={wrapperClass}
+    />
+  ) : (
+    <span class:list={wrapperClass} aria-hidden="true">
+      🏳️
+    </span>
+  )
+}
