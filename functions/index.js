@@ -18,8 +18,9 @@ const GITHUB_REPO = 'worldcup-live.json';
 const GITHUB_FILE_PATH = '2026/worldcup.json';
 const GITHUB_BRANCH = 'master';
 
-const RAW_MATCHES_URL = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_FILE_PATH}`;
 const COMMITS_URL = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/commits?path=${GITHUB_FILE_PATH}&per_page=1`;
+const API_CONTENTS_URL = (sha) =>
+  `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}?ref=${sha}`;
 
 const CACHE_COLLECTION = 'cache';
 const TOURNAMENT_META_DOC_ID = '_tournament';
@@ -51,12 +52,17 @@ async function fetchLastCommitSha(token) {
   return first.sha;
 }
 
-async function fetchRawTournament() {
-  const res = await fetch(RAW_MATCHES_URL, { cache: 'no-store' });
+async function fetchTournamentAtSha(sha, token) {
+  const res = await fetch(API_CONTENTS_URL(sha), {
+    cache: 'no-store',
+    headers: getGithubHeaders(token),
+  });
   if (!res.ok) {
-    throw new Error(`Raw JSON fetch failed: ${res.status} ${res.statusText}`);
+    throw new Error(`GitHub contents API failed: ${res.status} ${res.statusText}`);
   }
-  return res.json();
+  const file = await res.json();
+  const cleaned = (file.content ?? '').replace(/\n/g, '');
+  return JSON.parse(Buffer.from(cleaned, 'base64').toString('utf8'));
 }
 
 function hashContent(json) {
@@ -240,21 +246,22 @@ exports.syncTournament = onSchedule(
     const existingScores = await loadExistingScores();
     const firstRun = isFirstRun(existingMatchIds);
 
-    if (meta && meta.lastCommitSha === remoteSha && !firstRun) {
-      console.log('syncTournament: no commit changes and cache populated, skipping');
+    let fresh;
+    try {
+      fresh = await fetchTournamentAtSha(remoteSha, token);
+    } catch (err) {
+      console.error('fetchTournamentAtSha failed', err);
       return;
     }
 
-    let fresh;
-    try {
-      fresh = await fetchRawTournament();
-    } catch (err) {
-      console.error('fetchRawTournament failed', err);
+    const contentHash = hashContent(fresh);
+
+    if (meta && meta.lastCommitSha === remoteSha && meta.contentHash === contentHash && !firstRun) {
+      console.log('syncTournament: no commit changes and cache content matches, skipping');
       return;
     }
 
     const tournament = enrichMatchesWithIds(fresh);
-    const contentHash = hashContent(fresh);
     const now = new Date().toISOString();
 
     const newIds = new Set(tournament.matches.map((m) => m.id));
