@@ -6,70 +6,15 @@ import ShadowContainer from '../components/ShadowContainer.astro';
 import RuleCard from '../components/RuleCard.astro';
 import PointsTable from '../components/PointsTable.astro';
 import BulletList from '../components/BulletList.astro';
-
-const phaseGroupsMatches = {
-  intro: 'Sistema de puntuación:',
-  caption: 'Puntos por partido en fase de grupos',
-  rows: [
-    { text: 'Resultado correcto (victoria, derrota o empate)', value: '2' },
-    { text: 'Marcador exacto', value: '+5', extra: true },
-  ],
-  max: { label: 'Máximo por partido', value: '7' },
-};
-
-const phaseGroupsPositions = {
-  intro: 'Sistema de puntuación:',
-  caption: 'Puntos por predicción de posiciones en fase de grupos',
-  rows: [
-    { text: 'Cada equipo en su posición exacta dentro del grupo', value: '2' },
-    { text: 'Acertar las cuatro posiciones del grupo', value: '+2', extra: true },
-  ],
-  max: { label: 'Máximo por grupo', value: '10' },
-};
-
-const faseEliminatoriaRounds = {
-  caption: 'Puntos por resultado correcto en fase eliminatoria',
-  rows: [
-    { text: 'Dieciseisavos de final', value: '5' },
-    { text: 'Octavos de final', value: '8' },
-    { text: 'Cuartos de final', value: '12' },
-    { text: 'Semifinales', value: '18' },
-    { text: 'Final', value: '25' },
-  ],
-};
-
-const faseEliminatoriaExtra = {
-  caption: 'Puntuación adicional en fase eliminatoria',
-  rows: [{ text: 'Marcador exacto', value: '+5', extra: true }],
-};
-
-const prediccionesEspeciales = {
-  intro: 'Estas predicciones se evalúan al finalizar el torneo:',
-  caption: 'Puntos por predicciones especiales',
-  rows: [
-    { text: 'Campeón del torneo', value: '25' },
-    { text: 'Subcampeón', value: '15' },
-    { text: 'Máximo goleador', value: '15' },
-    { text: 'Máximo asistidor', value: '15' },
-    { text: 'Mejor jugador del torneo', value: '15' },
-    { text: 'Hasta dónde llega México 🇲🇽', value: '10' },
-    { text: 'Equipo con más goles anotados', value: '10' },
-    { text: 'Equipo con más porterías a cero', value: '10' },
-  ],
-};
-
-const empates = [
-  'Si predecís empate al finalizar los 90 minutos, será <strong class="text-text font-semibold">obligatorio</strong> seleccionar qué equipo avanza a la siguiente ronda.',
-  'No se otorgarán puntos adicionales por acertar el equipo clasificado.',
-  "No importa si la clasificación ocurre en tiempo extra o mediante penales; se usa solo para definir quién avanza en el bracket del Pick'em.",
-];
-
-const consideraciones = [
-  'Esto es entre amigos: tomátelo con humor y buena onda. 🥰',
-  'Las reglas están escritas para ser claras; si algo no se entiende, preguntá.',
-  'Los puntos importantes siempre aparecen resaltados en color.',
-  'El que queda último, tiene que picharle dogos a todos los jugadores 🍕',
-];
+import {
+  phaseGroupsMatches,
+  phaseGroupsPositions,
+  knockoutRounds,
+  knockoutBonus,
+  specialPredictions,
+  knockoutTies,
+  considerations,
+} from '../data/rules';
 ---
 
 <Layout
@@ -132,13 +77,13 @@ const consideraciones = [
             <p class="text-[0.6875rem] font-semibold tracking-widest uppercase text-text-tertiary mb-2">
               Por resultado correcto
             </p>
-            <PointsTable data={faseEliminatoriaRounds} compact />
+            <PointsTable data={knockoutRounds} compact />
           </div>
           <div>
             <p class="text-[0.6875rem] font-semibold tracking-widest uppercase text-text-tertiary mb-2">
               Puntuación adicional
             </p>
-            <PointsTable data={faseEliminatoriaExtra} compact />
+            <PointsTable data={knockoutBonus} compact />
             <p class="text-xs text-text-tertiary mt-3 leading-relaxed">
               <span aria-hidden="true">🏅</span> A mayor ronda, mayor el riesgo… y mayor la recompensa.
             </p>
@@ -147,12 +92,12 @@ const consideraciones = [
       </RuleCard>
 
       <RuleCard number={6} title="Empates en fase eliminatoria">
-        <BulletList items={empates} class="space-y-2" />
+        <BulletList items={knockoutTies} class="space-y-2" />
       </RuleCard>
 
       <RuleCard number={7} title="Predicciones especiales">
-        <p class="mb-4">{prediccionesEspeciales.intro}</p>
-        <PointsTable data={prediccionesEspeciales} />
+        <p class="mb-4">{specialPredictions.intro}</p>
+        <PointsTable data={specialPredictions} />
       </RuleCard>
     </div>
 
@@ -167,7 +112,7 @@ const consideraciones = [
           </span>
           <div>
             <h2 class="text-lg md:text-xl font-bold mb-2">A tener en cuenta</h2>
-            <BulletList items={consideraciones} markerClass="font-bold" class="text-sm space-y-1.5" />
+            <BulletList items={considerations} markerClass="font-bold" class="text-sm space-y-1.5" />
           </div>
         </div>
       </ShadowContainer>

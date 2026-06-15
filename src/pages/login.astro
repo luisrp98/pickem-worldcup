@@ -7,12 +7,12 @@ import { verifySession } from '../lib/firebase/session';
 
 const user = await verifySession(Astro.cookies);
 if (user) {
-  return Astro.redirect(safeFromFromUrl(Astro.url));
+  return Astro.redirect(safeRedirectFromUrl(Astro.url));
 }
 
-const safeFrom = safeFromFromUrl(Astro.url);
+const safeRedirect = safeRedirectFromUrl(Astro.url);
 
-function safeFromFromUrl(url: URL): string {
+function safeRedirectFromUrl(url: URL): string {
   const raw = url.searchParams.get('from');
   if (!raw) return '/';
   if (!raw.startsWith('/') || raw.startsWith('//')) return '/';
@@ -32,6 +32,6 @@ function safeFromFromUrl(url: URL): string {
       <p class="text-sm text-text-secondary">Iniciá sesión con tu cuenta para continuar.</p>
     </header>
 
-    <LoginForm from={safeFrom} />
+    <LoginForm from={safeRedirect} />
   </div>
 </Layout>
