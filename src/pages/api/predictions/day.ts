@@ -2,7 +2,8 @@ import type { APIRoute } from 'astro';
 import { getAdminFirestore } from '../../../lib/firebase/admin';
 import { verifySession } from '../../../lib/firebase/session';
 import { loadTournament } from '../../../lib/sync';
-import { getMatchStatus, type Match } from '../../../lib/matches';
+import { getMatchStatus, parseKickoff, type Match } from '../../../lib/matches';
+import { SCORING_VERSION, type StoredPrediction } from '../../../lib/scoring';
 
 export const prerender = false;
 
@@ -84,7 +85,7 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
 
   const matchesById = buildMatchesById(tournament.matches);
   const unknownIds: string[] = [];
-  const closedIds: string[] = [];
+  const lockedIds: string[] = [];
   const now = new Date();
   for (const p of validated) {
     const match = matchesById.get(p.matchId);
@@ -92,16 +93,16 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
       unknownIds.push(p.matchId);
       continue;
     }
-    if (getMatchStatus(match, now) === 'closed') {
-      closedIds.push(p.matchId);
+    if (getMatchStatus(match, now) !== 'pending') {
+      lockedIds.push(p.matchId);
     }
   }
 
   if (unknownIds.length > 0) {
     return jsonResponse({ error: 'unknown-match', matchIds: unknownIds }, 400);
   }
-  if (closedIds.length > 0) {
-    return jsonResponse({ error: 'match-closed', matchIds: closedIds }, 409);
+  if (lockedIds.length > 0) {
+    return jsonResponse({ error: 'match-locked', matchIds: lockedIds }, 409);
   }
 
   const db = getAdminFirestore();
@@ -110,38 +111,42 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
   const existing = await userRef.collection('predictions').get();
   const existingIds = new Set(existing.docs.map((d) => d.id));
 
-  const incomingIds = new Set(validated.map((p) => p.matchId));
-
   const batch = db.batch();
   const nowIso = new Date().toISOString();
 
   for (const p of validated) {
-    const ref = userRef.collection('predictions').doc(p.matchId);
-    batch.set(
-      ref,
-      {
-        matchId: p.matchId,
-        date: body.date,
-        score1: p.score1,
-        score2: p.score2,
-        updatedAt: nowIso,
-      },
-      { merge: true }
-    );
-  }
+    const match = matchesById.get(p.matchId);
+    if (!match) continue;
 
-  for (const id of existingIds) {
-    if (!incomingIds.has(id)) {
-      const ref = userRef.collection('predictions').doc(id);
-      batch.delete(ref);
+    const kickoff = parseKickoff(match);
+    const kickoffAt = kickoff ? kickoff.toISOString() : '';
+
+    const ref = userRef.collection('predictions').doc(p.matchId);
+    const data: Record<string, unknown> = {
+      matchId: p.matchId,
+      round: match.round ?? '',
+      group: match.group ?? null,
+      team1: match.team1,
+      team2: match.team2,
+      kickoffAt,
+      score1: p.score1,
+      score2: p.score2,
+      updatedAt: nowIso,
+      scoringVersion: SCORING_VERSION,
+    };
+
+    if (!existingIds.has(p.matchId)) {
+      data.createdAt = nowIso;
     }
+
+    batch.set(ref, data, { merge: true });
   }
 
   await batch.commit();
 
   return jsonResponse({
     saved: validated.length,
-    removed: [...existingIds].filter((id) => !incomingIds.has(id)).length,
+    removed: 0,
     savedAt: nowIso,
   });
 };
@@ -153,16 +158,27 @@ export const GET: APIRoute = async ({ cookies }) => {
   const db = getAdminFirestore();
   const snap = await db.collection('users').doc(user.uid).collection('predictions').get();
 
-  const predictions: Record<string, { score1: number; score2: number; date?: string }> = {};
+  const predictions: Record<string, StoredPrediction> = {};
   for (const doc of snap.docs) {
-    const data = doc.data() as { score1?: number; score2?: number; date?: string };
-    if (typeof data.score1 === 'number' && typeof data.score2 === 'number') {
-      predictions[doc.id] = {
-        score1: data.score1,
-        score2: data.score2,
-        date: data.date,
-      };
-    }
+    const data = doc.data() as Partial<StoredPrediction>;
+    if (typeof data.score1 !== 'number' || typeof data.score2 !== 'number') continue;
+    predictions[doc.id] = {
+      matchId: doc.id,
+      score1: data.score1,
+      score2: data.score2,
+      round: data.round ?? '',
+      group: data.group ?? null,
+      team1: data.team1 ?? '',
+      team2: data.team2 ?? '',
+      kickoffAt: data.kickoffAt ?? '',
+      createdAt: data.createdAt ?? '',
+      updatedAt: data.updatedAt ?? '',
+      points: data.points ?? null,
+      resultado: data.resultado ?? null,
+      marcador: data.marcador ?? null,
+      scoredAt: data.scoredAt ?? null,
+      scoringVersion: data.scoringVersion ?? SCORING_VERSION,
+    };
   }
 
   return jsonResponse({ predictions });
