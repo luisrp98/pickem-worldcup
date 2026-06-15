@@ -40,7 +40,6 @@ function readMatchInputsFromDom(item: HTMLElement): PredictionsMap {
 }
 
 function markDayDirty(item: HTMLElement) {
-  item.querySelectorAll<HTMLElement>('[data-dirty-indicator]').forEach((i) => i.classList.remove('hidden'));
   const btn = item.querySelector<HTMLButtonElement>('[data-save-day]');
   if (btn) btn.disabled = false;
   const status = item.querySelector<HTMLElement>('[data-save-status]');
@@ -53,7 +52,6 @@ function markDayDirty(item: HTMLElement) {
 }
 
 function markDayClean(item: HTMLElement, message: string, isError: boolean) {
-  item.querySelectorAll<HTMLElement>('[data-dirty-indicator]').forEach((i) => i.classList.add('hidden'));
   const btn = item.querySelector<HTMLButtonElement>('[data-save-day]');
   if (!isError && btn) btn.disabled = true;
   const status = item.querySelector<HTMLElement>('[data-save-status]');
@@ -95,7 +93,7 @@ function attachSaveHandlers() {
           body: JSON.stringify({ date, predictions: arr }),
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        markDayClean(item, 'Guardado', false);
+        markDayClean(item, 'Cambios guardados', false);
       } catch (err) {
         console.error('save day failed', err);
         markDayClean(item, 'Error al guardar', true);

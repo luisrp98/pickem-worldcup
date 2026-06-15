@@ -13,7 +13,7 @@ const { match, prediction = null } = Astro.props;
 
 const status = getMatchStatus(match);
 const ft = match.score?.ft;
-const disabled = status === 'closed';
+const disabled = status !== 'pending';
 const homeValue = prediction?.score1;
 const awayValue = prediction?.score2;
 const points = calculateMatchPoints(match, prediction);
@@ -56,8 +56,6 @@ const inputClass =
         data-score-away
         class={inputClass}
       />
-      <span class="size-1.5 rounded-full bg-arceus-accent-500 hidden shrink-0" data-dirty-indicator aria-hidden="true"
-      ></span>
     </div>
     <div class="flex items-center gap-2 flex-1 min-w-0 justify-end">
       <span class="text-sm font-semibold text-text truncate">{match.team2}</span>
