@@ -1,7 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import PageHeader from '../components/PageHeader.astro';
 import MatchdayAccordion from '../components/matches/MatchdayAccordion.astro';
-import { fetchMatches, groupByDate } from '../lib/matches';
+import { groupByDate } from '../lib/matches';
+import { loadTournament } from '../lib/sync';
 import { loadPredictions } from '../lib/server/predictions';
 
 let matchesByDate: Map<string, import('../lib/matches').Match[]> = new Map();
@@ -9,7 +11,7 @@ let predictions: import('../lib/server/predictions').PredictionsMap = {};
 let loadError = false;
 
 try {
-  const tournament = await fetchMatches();
+  const tournament = await loadTournament();
   matchesByDate = groupByDate(tournament.matches);
   predictions = await loadPredictions(Astro.cookies);
 } catch (err) {
@@ -25,18 +27,11 @@ const dates = [...matchesByDate.keys()].sort();
   description="Consulta y registra tus predicciones para los próximos partidos del mundial."
 >
   <div class="max-w-300 mx-auto px-6 md:px-8 py-8 md:py-12">
-    <header class="mb-8 md:mb-10">
-      <div class="flex items-center gap-4 mb-4 pb-2 border-b border-border">
-        <span class="text-xs font-semibold tracking-widest uppercase text-text-secondary"> Tus pronósticos </span>
-        <span class="flex-1"></span>
-      </div>
-      <h1 class="text-3xl md:text-5xl font-bold leading-[1.1] tracking-wide mb-3">
-        <span class="text-text-hover-primary">Predicciones</span> de la fase de grupos
-      </h1>
-      <p class="text-base text-text-secondary max-w-xl leading-relaxed">
+    <PageHeader eyebrow="Tus pronósticos" title="Predicciones de la fase de grupos" highlight="Predicciones">
+      <Fragment slot="description">
         Tocá cada día para ver los partidos y registrar tu marcador. <span aria-hidden="true">⚽</span>
-      </p>
-    </header>
+      </Fragment>
+    </PageHeader>
 
     {
       loadError ? (

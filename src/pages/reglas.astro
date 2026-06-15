@@ -2,6 +2,7 @@
 export const prerender = true;
 
 import Layout from '../layouts/Layout.astro';
+import PageHeader from '../components/PageHeader.astro';
 import ShadowContainer from '../components/ShadowContainer.astro';
 import RuleCard from '../components/RuleCard.astro';
 import PointsTable from '../components/PointsTable.astro';
@@ -22,19 +23,12 @@ import {
   description="Conoce las reglas del PICKEM: puntaje, plazos, bonificaciones y todo lo que necesitás saber para competir entre amigos."
 >
   <div class="max-w-300 mx-auto px-6 md:px-8 py-8 md:py-12">
-    <header class="mb-8 md:mb-10">
-      <div class="flex items-center gap-4 mb-4 pb-2 border-b border-border">
-        <span class="text-xs font-semibold tracking-widest uppercase text-text-secondary">Reglas del juego</span>
-        <span class="flex-1"></span>
-      </div>
-      <h1 class="text-3xl md:text-5xl font-bold leading-[1.1] tracking-wide mb-3">
-        ¿Cómo se <span class="text-text-hover-primary">puntúa</span>?
-      </h1>
-      <p class="text-base text-text-secondary max-w-xl leading-relaxed">
+    <PageHeader eyebrow="Reglas del juego" title="¿Cómo se puntúa?" highlight="puntúa">
+      <Fragment slot="description">
         Todo lo que necesitás saber para competir en el PICKEM. Leelas con calma, armá tu estrategia y que gane el
         mejor. <span aria-hidden="true">⏱</span>
-      </p>
-    </header>
+      </Fragment>
+    </PageHeader>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <RuleCard number={1} title="Cierre de predicciones">

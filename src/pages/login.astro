@@ -2,6 +2,7 @@
 export const prerender = false;
 
 import Layout from '../layouts/Layout.astro';
+import PageHeader from '../components/PageHeader.astro';
 import LoginForm from '../components/LoginForm.astro';
 import { verifySession } from '../lib/firebase/session';
 
@@ -20,17 +21,11 @@ function safeRedirectFromUrl(url: URL): string {
 }
 ---
 
-<Layout
-  title="Iniciar sesión — PICKEM"
-  description="Iniciá sesión para registrar tus predicciones del mundial."
->
+<Layout title="Iniciar sesión — PICKEM" description="Iniciá sesión para registrar tus predicciones del mundial.">
   <div class="max-w-md mx-auto pt-12 md:pt-20">
-    <header class="mb-8 text-center">
-      <h1 class="text-3xl md:text-4xl font-bold tracking-wide mb-2">
-        Bienvenido a <span class="text-text-hover-primary">PICK'EM</span>
-      </h1>
-      <p class="text-sm text-text-secondary">Iniciá sesión con tu cuenta para continuar.</p>
-    </header>
+    <PageHeader title="Bienvenido a PICK'EM" highlight="PICK'EM" centered>
+      <Fragment slot="description">Iniciá sesión con tu cuenta para continuar.</Fragment>
+    </PageHeader>
 
     <LoginForm from={safeRedirect} />
   </div>

@@ -1,0 +1,48 @@
+---
+export interface Props {
+  eyebrow?: string;
+  title: string;
+  highlight?: string;
+  centered?: boolean;
+}
+
+const { eyebrow, title, highlight, centered = false } = Astro.props;
+const parts = highlight ? title.split(highlight) : [title];
+---
+
+<header class:list={[centered ? 'mb-8 text-center' : 'mb-8 md:mb-10']}>
+  {
+    eyebrow && !centered && (
+      <div class="flex items-center gap-4 mb-4 pb-2 border-b border-border">
+        <span class="text-xs font-semibold tracking-widest uppercase text-text-secondary">{eyebrow}</span>
+        <span class="flex-1" />
+      </div>
+    )
+  }
+  <h1
+    class:list={[
+      'font-bold tracking-wide',
+      centered ? 'text-3xl md:text-4xl mb-2' : 'text-3xl md:text-5xl leading-[1.1] mb-3',
+    ]}
+  >
+    {
+      parts.map((part, i) => (
+        <Fragment>
+          {part}
+          {i < parts.length - 1 && <span class="text-text-hover-primary">{highlight}</span>}
+        </Fragment>
+      ))
+    }
+  </h1>
+  {
+    Astro.slots.has('description') && (
+      <p
+        class:list={[
+          centered ? 'text-sm text-text-secondary' : 'text-base text-text-secondary leading-relaxed max-w-xl',
+        ]}
+      >
+        <slot name="description" />
+      </p>
+    )
+  }
+</header>
