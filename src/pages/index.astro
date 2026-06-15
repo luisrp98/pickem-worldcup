@@ -1,9 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import ShadowContainer from '../components/ShadowContainer.astro';
-import UpcomingMatch from '../components/matches/UpcomingMatch.astro';
+import Greeting from '../components/home/Greeting.astro';
+import UpcomingMatchesCard from '../components/home/UpcomingMatchesCard.astro';
+import PointsSummaryCard from '../components/home/PointsSummaryCard.astro';
 import { fetchMatches, getMatchStatus, parseKickoff } from '../lib/matches';
-import { formatCountdown } from '../lib/dateFormat';
 
 const UPCOMING_LIMIT = 3;
 
@@ -34,53 +34,16 @@ try {
   console.error('home: load failed', err);
   loadError = true;
 }
-
-const initialCountdown = nextKickoffISO ? formatCountdown(new Date(nextKickoffISO), new Date()) : '—';
 ---
 
 <Layout
   title="PICKEM — Predicciones Deportivas"
   description="Plataforma de predicciones deportivas. Registra tus pronósticos, consulta las reglas y sigue la clasificación."
 >
-  <div class="text-2xl font-bold text-center pt-8">
-    <h1>¡Hola {friendlyName}! 👋</h1>
-  </div>
+  <Greeting name={friendlyName} />
   <div class="flex flex-col gap-4">
-    <ShadowContainer>
-      <div class="flex flex-col gap-3 p-2">
-        <div class="flex items-center justify-between">
-          <h2>Próximos partidos</h2>
-          <p data-countdown data-next-kickoff={nextKickoffISO} aria-live="polite">{initialCountdown}</p>
-        </div>
-
-        <hr class="border-t border-bg-secondary/40" />
-        <div class="flex flex-col gap-2" data-upcoming>
-          {
-            loadError ? (
-              <p class="text-sm text-text-tertiary py-4 text-center">No se pudieron cargar los partidos.</p>
-            ) : upcoming.length === 0 ? (
-              <p class="text-sm text-text-tertiary py-4 text-center">No hay partidos próximos.</p>
-            ) : (
-              upcoming.map((match) => <UpcomingMatch match={match} />)
-            )
-          }
-        </div>
-      </div>
-    </ShadowContainer>
-
-    <ShadowContainer>
-      <div class="flex flex-col gap-3 p-2">
-        <h1>Tus puntos</h1>
-
-        <span class="text-5xl font-bold leading-none tabular-nums">0 pts</span>
-
-        <div class="flex justify-end">
-          <a href="/clasificacion" class="text-xs font-semibold tracking-wider uppercase hover:underline">
-            Ver tabla &gt;</a
-          >
-        </div>
-      </div>
-    </ShadowContainer>
+    <UpcomingMatchesCard matches={upcoming} nextKickoffISO={nextKickoffISO} loadError={loadError} />
+    <PointsSummaryCard points={0} />
   </div>
 </Layout>
 

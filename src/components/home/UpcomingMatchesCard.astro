@@ -1,0 +1,36 @@
+---
+import ShadowContainer from '../ShadowContainer.astro';
+import UpcomingMatch from '../matches/UpcomingMatch.astro';
+import Countdown from './Countdown.astro';
+import type { Match } from '../../lib/matches';
+
+export interface Props {
+  matches: Match[];
+  nextKickoffISO: string;
+  loadError?: boolean;
+}
+
+const { matches, nextKickoffISO, loadError = false } = Astro.props;
+---
+
+<ShadowContainer>
+  <div class="flex flex-col gap-3 p-2">
+    <div class="flex items-center justify-between">
+      <h2 class="text-lg font-semibold">Próximos partidos</h2>
+      <Countdown targetISO={nextKickoffISO} />
+    </div>
+
+    <hr class="border-t border-bg-secondary/40" />
+    <div class="flex flex-col gap-2" data-upcoming>
+      {
+        loadError ? (
+          <p class="text-sm text-text-tertiary py-4 text-center">No se pudieron cargar los partidos.</p>
+        ) : matches.length === 0 ? (
+          <p class="text-sm text-text-tertiary py-4 text-center">No hay partidos próximos.</p>
+        ) : (
+          matches.map((match) => <UpcomingMatch match={match} />)
+        )
+      }
+    </div>
+  </div>
+</ShadowContainer>

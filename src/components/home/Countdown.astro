@@ -1,0 +1,17 @@
+---
+import { formatCountdown } from '../../lib/dateFormat';
+
+export interface Props {
+  targetISO: string;
+  now?: Date;
+  class?: string;
+}
+
+const { targetISO, now = new Date(), class: className } = Astro.props;
+const target = new Date(targetISO);
+const text = Number.isNaN(target.getTime()) ? '—' : formatCountdown(target, now);
+---
+
+<p data-countdown data-next-kickoff={targetISO} class:list={['tabular-nums', className]} aria-live="polite">
+  {text}
+</p>
