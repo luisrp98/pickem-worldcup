@@ -1,4 +1,6 @@
 ---
+import Avatar from './leaderboard/Avatar.astro';
+
 export interface Props {
   email: string;
 }
@@ -22,11 +24,7 @@ const initials = initialsFromEmail(email);
     class="list-none cursor-pointer flex items-center gap-2 px-2 py-1 rounded-sm hover:bg-muted transition-colors [&::-webkit-details-marker]:hidden"
     aria-label="Menú de usuario"
   >
-    <span
-      class="w-8 h-8 rounded-full bg-arceus-secondary-950 text-arceus-primary-50 flex items-center justify-center text-xs font-semibold shrink-0"
-    >
-      {initials}
-    </span>
+    <Avatar initials={initials} variant="dark" />
     <span class="hidden sm:inline text-xs font-medium text-text-secondary max-w-32 truncate">
       {email}
     </span>

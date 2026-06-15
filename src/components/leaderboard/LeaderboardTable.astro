@@ -1,0 +1,30 @@
+---
+import type { LeaderboardEntry } from '../../data/leaderboard';
+import LeaderboardRow from './LeaderboardRow.astro';
+
+export interface Props {
+  entries: LeaderboardEntry[];
+}
+
+const { entries } = Astro.props;
+
+const thBase =
+  'text-xs font-semibold tracking-widest uppercase text-text-secondary text-left px-5 py-3.5 border-b border-border bg-muted';
+---
+
+<table class="w-full border-collapse border border-border">
+  <caption class="sr-only">Clasificación de participantes</caption>
+  <thead>
+    <tr>
+      <th scope="col" class={`${thBase} w-14`}>POS</th>
+      <th scope="col" class={`${thBase} w-14`}></th>
+      <th scope="col" class={thBase}>USUARIO</th>
+      <th scope="col" class={`${thBase} w-28 max-sm:hidden`}>ACIERTOS RESULTADO</th>
+      <th scope="col" class={`${thBase} w-28 max-sm:hidden`}>ACIERTOS MARCADOR</th>
+      <th scope="col" class={`${thBase} w-16`}>PTS</th>
+    </tr>
+  </thead>
+  <tbody>
+    {entries.map((entry) => <LeaderboardRow entry={entry} />)}
+  </tbody>
+</table>

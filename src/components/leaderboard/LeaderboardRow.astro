@@ -1,0 +1,34 @@
+---
+import type { LeaderboardEntry } from '../../data/leaderboard';
+import PositionBadge from './PositionBadge.astro';
+import Avatar from './Avatar.astro';
+
+export interface Props {
+  entry: LeaderboardEntry;
+}
+
+const { entry } = Astro.props;
+
+const tdBase = 'px-5 py-3.5 border-b border-border text-sm';
+---
+
+<tr class={entry.pos <= 3 ? 'bg-muted' : ''}>
+  <td class={tdBase}>
+    <PositionBadge pos={entry.pos} />
+  </td>
+  <td class={tdBase}>
+    <Avatar initials={entry.initials} />
+  </td>
+  <td class={tdBase}>
+    <span class="font-semibold text-text">{entry.name}</span>
+  </td>
+  <td class={`${tdBase} max-sm:hidden`}>
+    <span class="font-medium text-text">{entry.result}</span>
+  </td>
+  <td class={`${tdBase} max-sm:hidden`}>
+    <span class="font-medium text-text">{entry.score}</span>
+  </td>
+  <td class={tdBase}>
+    <span class="font-bold text-base text-text">{entry.points}</span>
+  </td>
+</tr>

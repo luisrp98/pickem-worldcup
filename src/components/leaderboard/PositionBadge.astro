@@ -1,0 +1,15 @@
+---
+export interface Props {
+  pos: number;
+  class?: string;
+}
+
+const { pos, class: className } = Astro.props;
+
+const medalClass =
+  pos === 1 ? 'text-gold' : pos === 2 ? 'text-silver' : pos === 3 ? 'text-bronze' : 'text-text-tertiary';
+---
+
+<span class:list={['font-bold text-sm', medalClass, className]} aria-label={`Posición ${pos}`}>
+  {pos}
+</span>

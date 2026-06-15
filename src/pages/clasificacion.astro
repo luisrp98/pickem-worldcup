@@ -1,15 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import ShadowContainer from '../components/ShadowContainer.astro';
+import LeaderboardTable from '../components/leaderboard/LeaderboardTable.astro';
 import { leaderboard } from '../data/leaderboard';
-
-const thBase =
-  'text-xs font-semibold tracking-widest uppercase text-text-secondary text-left px-5 py-3.5 border-b border-border bg-muted';
-
-const tdBase = 'px-5 py-3.5 border-b border-border text-sm';
-
-const avatar =
-  'w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-xs font-semibold text-text-secondary shrink-0';
 ---
 
 <Layout
@@ -18,54 +11,7 @@ const avatar =
 >
   <div class="max-w-4xl mx-auto">
     <ShadowContainer>
-      <table class="w-full border-collapse border border-border">
-        <thead>
-          <tr>
-            <th class={`${thBase} w-14`}>POS</th>
-            <th class={`${thBase} w-14`}></th>
-            <th class={thBase}>USUARIO</th>
-            <th class={`${thBase} w-28 max-sm:hidden`}>ACIERTOS RESULTADO</th>
-            <th class={`${thBase} w-28 max-sm:hidden`}>ACIERTOS MARCADOR</th>
-            <th class={`${thBase} w-16`}>PTS</th>
-          </tr>
-        </thead>
-        <tbody>
-          {
-            leaderboard.map((entry) => (
-              <tr class={entry.pos <= 3 ? 'bg-muted' : ''}>
-                <td class={tdBase}>
-                  <span
-                    class:list={[
-                      'font-bold text-sm',
-                      entry.pos === 1 && 'text-gold',
-                      entry.pos === 2 && 'text-silver',
-                      entry.pos === 3 && 'text-bronze',
-                      entry.pos > 3 && 'text-text-tertiary',
-                    ]}
-                  >
-                    {entry.pos}
-                  </span>
-                </td>
-                <td class={tdBase}>
-                  <span class={avatar}>{entry.initials}</span>
-                </td>
-                <td class={tdBase}>
-                  <span class="font-semibold text-text">{entry.name}</span>
-                </td>
-                <td class={`${tdBase} max-sm:hidden`}>
-                  <span class="font-medium text-text">{entry.result}</span>
-                </td>
-                <td class={`${tdBase} max-sm:hidden`}>
-                  <span class="font-medium text-text">{entry.score}</span>
-                </td>
-                <td class={tdBase}>
-                  <span class="font-bold text-base text-text">{entry.points}</span>
-                </td>
-              </tr>
-            ))
-          }
-        </tbody>
-      </table>
+      <LeaderboardTable entries={leaderboard} />
     </ShadowContainer>
   </div>
 </Layout>

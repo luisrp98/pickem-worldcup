@@ -1,0 +1,25 @@
+---
+export interface Props {
+  initials: string;
+  variant?: 'light' | 'dark';
+  class?: string;
+}
+
+const { initials, variant = 'light', class: className } = Astro.props;
+
+const variantClass =
+  variant === 'dark'
+    ? 'bg-arceus-secondary-950 text-arceus-primary-50'
+    : 'bg-muted text-text-secondary border border-border';
+---
+
+<span
+  class:list={[
+    'w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0',
+    variantClass,
+    className,
+  ]}
+  aria-hidden="true"
+>
+  {initials}
+</span>
