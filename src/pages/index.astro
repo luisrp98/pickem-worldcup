@@ -3,7 +3,8 @@ import Layout from '../layouts/Layout.astro';
 import Greeting from '../components/home/Greeting.astro';
 import UpcomingMatchesCard from '../components/home/UpcomingMatchesCard.astro';
 import PointsSummaryCard from '../components/home/PointsSummaryCard.astro';
-import { fetchMatches, getMatchStatus, parseKickoff } from '../lib/matches';
+import { getMatchStatus, parseKickoff } from '../lib/matches';
+import { loadTournament } from '../lib/sync';
 
 const UPCOMING_LIMIT = 3;
 
@@ -15,7 +16,7 @@ let nextKickoffISO = '';
 let loadError = false;
 
 try {
-  const tournament = await fetchMatches();
+  const tournament = await loadTournament();
   const now = new Date();
   upcoming = tournament.matches
     .map((m) => ({ match: m, kickoff: parseKickoff(m) }))
