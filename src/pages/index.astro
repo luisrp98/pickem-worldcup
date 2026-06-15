@@ -1,9 +1,41 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import ShadowContainer from '../components/ShadowContainer.astro';
+import UpcomingMatch from '../components/matches/UpcomingMatch.astro';
+import { fetchMatches, getMatchStatus, parseKickoff } from '../lib/matches';
+import { formatCountdown } from '../lib/dateFormat';
+
+const UPCOMING_LIMIT = 3;
 
 const user = Astro.locals.user!;
 const friendlyName = user.email.split('@')[0] ?? user.email;
+
+let upcoming: import('../lib/matches').Match[] = [];
+let nextKickoffISO = '';
+let loadError = false;
+
+try {
+  const tournament = await fetchMatches();
+  const now = new Date();
+  upcoming = tournament.matches
+    .map((m) => ({ match: m, kickoff: parseKickoff(m) }))
+    .filter(
+      (x) => x.kickoff !== null && getMatchStatus(x.match, now) === 'pending' && x.kickoff.getTime() > now.getTime(),
+    )
+    .sort((a, b) => (a.kickoff as Date).getTime() - (b.kickoff as Date).getTime())
+    .slice(0, UPCOMING_LIMIT)
+    .map((x) => x.match);
+
+  const nextKickoff = upcoming.length > 0 ? parseKickoff(upcoming[0]) : null;
+  if (nextKickoff) {
+    nextKickoffISO = nextKickoff.toISOString();
+  }
+} catch (err) {
+  console.error('home: load failed', err);
+  loadError = true;
+}
+
+const initialCountdown = nextKickoffISO ? formatCountdown(new Date(nextKickoffISO), new Date()) : '—';
 ---
 
 <Layout
@@ -11,19 +43,27 @@ const friendlyName = user.email.split('@')[0] ?? user.email;
   description="Plataforma de predicciones deportivas. Registra tus pronósticos, consulta las reglas y sigue la clasificación."
 >
   <div class="text-2xl font-bold text-center pt-8">
-    <h1 class="">¡Hola {friendlyName}! 👋</h1>
+    <h1>¡Hola {friendlyName}! 👋</h1>
   </div>
   <div class="flex flex-col gap-4">
     <ShadowContainer>
       <div class="flex flex-col gap-3 p-2">
         <div class="flex items-center justify-between">
-          <h2>Proximos partidos</h2>
-          <p data-countdown>—</p>
+          <h2>Próximos partidos</h2>
+          <p data-countdown data-next-kickoff={nextKickoffISO} aria-live="polite">{initialCountdown}</p>
         </div>
 
         <hr class="border-t border-bg-secondary/40" />
         <div class="flex flex-col gap-2" data-upcoming>
-          <p class="text-sm text-text-tertiary py-4 text-center" data-loading>Cargando…</p>
+          {
+            loadError ? (
+              <p class="text-sm text-text-tertiary py-4 text-center">No se pudieron cargar los partidos.</p>
+            ) : upcoming.length === 0 ? (
+              <p class="text-sm text-text-tertiary py-4 text-center">No hay partidos próximos.</p>
+            ) : (
+              upcoming.map((match) => <UpcomingMatch match={match} />)
+            )
+          }
         </div>
       </div>
     </ShadowContainer>
@@ -45,8 +85,6 @@ const friendlyName = user.email.split('@')[0] ?? user.email;
 </Layout>
 
 <script>
-  // Phase 5/6 will add a controller here that fetches matches, renders
-  // <UpcomingMatch> components in [data-upcoming], ticks the countdown in
-  // [data-countdown], and polls every 5 min. For now, the static
-  // placeholder above is shown.
+  import { mountHomeController } from '../scripts/homeController';
+  mountHomeController();
 </script>

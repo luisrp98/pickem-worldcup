@@ -1,5 +1,23 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import MatchdayAccordion from '../components/matches/MatchdayAccordion.astro';
+import { fetchMatches, groupByDate } from '../lib/matches';
+import { loadPredictions } from '../lib/server/predictions';
+
+let matchesByDate: Map<string, import('../lib/matches').Match[]> = new Map();
+let predictions: import('../lib/server/predictions').PredictionsMap = {};
+let loadError = false;
+
+try {
+  const tournament = await fetchMatches();
+  matchesByDate = groupByDate(tournament.matches);
+  predictions = await loadPredictions(Astro.cookies);
+} catch (err) {
+  console.error('predicciones: load failed', err);
+  loadError = true;
+}
+
+const dates = [...matchesByDate.keys()].sort();
 ---
 
 <Layout
@@ -20,14 +38,30 @@ import Layout from '../layouts/Layout.astro';
       </p>
     </header>
 
-    <div class="flex flex-col gap-3" data-accordion>
-      <p class="text-sm text-text-tertiary py-8 text-center" data-loading>Cargando partidos…</p>
-    </div>
+    {
+      loadError ? (
+        <p class="text-sm text-text-tertiary py-8 text-center">
+          No se pudieron cargar los partidos. Reintentá en unos minutos.
+        </p>
+      ) : dates.length === 0 ? (
+        <p class="text-sm text-text-tertiary py-8 text-center">No hay partidos disponibles.</p>
+      ) : (
+        <div class="flex flex-col gap-3" data-accordion>
+          {dates.map((dateISO, idx) => (
+            <MatchdayAccordion
+              dateISO={dateISO}
+              dayNumber={idx + 1}
+              matches={matchesByDate.get(dateISO) ?? []}
+              predictions={predictions}
+            />
+          ))}
+        </div>
+      )
+    }
   </div>
 </Layout>
 
 <script>
-  // Phase 5 will add a controller here that fetches matches + predictions,
-  // renders <MatchdayAccordion> components, attaches accordion + save handlers,
-  // and polls every 5 min. For now, the static placeholder above is shown.
+  import { mountPredictionsController } from '../scripts/predictionsController';
+  mountPredictionsController();
 </script>
