@@ -1,7 +1,28 @@
 ---
+export interface Props {
+  bgClass?: string;
+  borderClass?: string;
+  shadowClass?: string;
+  class?: string;
+}
 
+const {
+  bgClass,
+  borderClass,
+  shadowClass,
+  class: className,
+} = Astro.props;
 ---
 
-<div class="relative w-full h-full bg-arceus-accent-400 before:content-[''] before:absolute before:inset-0 before:translate-x-2 before:translate-y-2 before:bg-black before:-z-10">
+<div
+  class:list={[
+    'relative w-full h-full',
+    bgClass || 'bg-arceus-accent-400',
+    borderClass,
+    "before:content-[''] before:absolute before:inset-0 before:translate-x-2 before:translate-y-2 before:-z-10",
+    shadowClass || 'before:bg-black',
+    className,
+  ]}
+>
   <slot />
 </div>
