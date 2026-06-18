@@ -1,0 +1,76 @@
+---
+export interface Props {
+  current: number;
+  previous: number | null;
+}
+
+const { current, previous } = Astro.props;
+
+type Direction = 'up' | 'down' | 'same';
+
+function getDirection(current: number, previous: number | null): Direction {
+  if (previous === null || previous === undefined) return 'same';
+  if (current < previous) return 'up';
+  if (current > previous) return 'down';
+  return 'same';
+}
+
+const direction = getDirection(current, previous);
+const delta = previous === null ? 0 : Math.abs(current - previous);
+const label =
+  direction === 'up'
+    ? `Subió ${delta} ${delta === 1 ? 'posición' : 'posiciones'}`
+    : direction === 'down'
+      ? `Bajó ${delta} ${delta === 1 ? 'posición' : 'posiciones'}`
+      : 'Mantuvo la posición';
+---
+
+<span class="inline-flex items-center justify-center max-sm:hidden" role="img" aria-label={label}>
+  {
+    direction === 'up' && (
+      <svg
+        class="size-[18px] text-green-600"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="m6 15 6-6 6 6" />
+      </svg>
+    )
+  }
+  {
+    direction === 'down' && (
+      <svg
+        class="size-[18px] text-red-600"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="m6 9 6 6 6-6" />
+      </svg>
+    )
+  }
+  {
+    direction === 'same' && (
+      <svg
+        class="size-[18px] text-text-tertiary"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <line x1="5" y1="12" x2="19" y2="12" />
+      </svg>
+    )
+  }
+</span>
