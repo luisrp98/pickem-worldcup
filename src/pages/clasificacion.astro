@@ -8,6 +8,7 @@ import { loadLeaderboard } from '../lib/server/leaderboard';
 
 let entries: LeaderboardEntry[] = [];
 let loadError = false;
+const currentUserUid = Astro.locals.user?.uid;
 
 try {
   entries = await loadLeaderboard(Astro.cookies);
@@ -37,7 +38,7 @@ try {
         </ShadowContainer>
       ) : (
         <ShadowContainer bgClass="bg-white">
-          <LeaderboardTable entries={entries} />
+          <LeaderboardTable entries={entries} currentUserUid={currentUserUid} />
         </ShadowContainer>
       )
     }

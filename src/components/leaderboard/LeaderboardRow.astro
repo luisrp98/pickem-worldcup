@@ -7,9 +7,10 @@ import { initialsFromName } from '../../lib/displayName';
 
 export interface Props {
   entry: LeaderboardEntry;
+  currentUserUid?: string;
 }
 
-const { entry } = Astro.props;
+const { entry, currentUserUid } = Astro.props;
 
 const tdBase = 'px-5 py-3.5 border-b border-border text-sm';
 
@@ -32,9 +33,14 @@ const podiumBorder =
         : '';
 
 const initials = initialsFromName(entry.displayName);
+
+const isSelf = Boolean(currentUserUid) && entry.uid === currentUserUid;
+const nameLinkClass = isSelf
+  ? 'inline-block font-semibold text-text rounded-sm ring-1 ring-arceus-accent-500/60 px-1.5 py-0.5 hover:underline hover:text-text-hover-primary transition-colors'
+  : 'font-semibold text-text hover:underline hover:text-text-hover-primary transition-colors';
 ---
 
-<tr class:list={[podiumBg, podiumBorder]}>
+<tr class:list={[podiumBg, podiumBorder]} data-self={isSelf ? 'true' : undefined}>
   <td class={tdBase}>
     <PositionBadge pos={entry.currentPosition} />
   </td>
@@ -45,10 +51,7 @@ const initials = initialsFromName(entry.displayName);
     <Avatar initials={initials} />
   </td>
   <td class={tdBase}>
-    <a
-      href={`/predicciones?uid=${entry.uid}`}
-      class="font-semibold text-text hover:underline hover:text-text-hover-primary transition-colors"
-    >
+    <a href={`/predicciones?uid=${entry.uid}`} class={nameLinkClass}>
       {entry.displayName}
     </a>
   </td>

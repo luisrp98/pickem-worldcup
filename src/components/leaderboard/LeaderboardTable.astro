@@ -4,9 +4,10 @@ import LeaderboardRow from './LeaderboardRow.astro';
 
 export interface Props {
   entries: LeaderboardEntry[];
+  currentUserUid?: string;
 }
 
-const { entries } = Astro.props;
+const { entries, currentUserUid } = Astro.props;
 
 const thBase =
   'text-xs font-semibold tracking-widest uppercase text-text-secondary text-left px-5 py-3.5 border-b border-border bg-muted';
@@ -26,6 +27,6 @@ const thBase =
     </tr>
   </thead>
   <tbody>
-    {entries.map((entry) => <LeaderboardRow entry={entry} />)}
+    {entries.map((entry) => <LeaderboardRow entry={entry} currentUserUid={currentUserUid} />)}
   </tbody>
 </table>
