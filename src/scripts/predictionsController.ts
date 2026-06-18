@@ -142,7 +142,13 @@ async function poll() {
 
 export function mountPredictionsController() {
   mountAccordion('[data-accordion]');
-  attachSaveHandlers();
-  poll();
-  setInterval(poll, POLL_MS);
+
+  const container = document.querySelector<HTMLElement>('[data-accordion]');
+  const isReadOnly = container?.dataset.readonly === 'true';
+
+  if (!isReadOnly) {
+    attachSaveHandlers();
+    poll();
+    setInterval(poll, POLL_MS);
+  }
 }

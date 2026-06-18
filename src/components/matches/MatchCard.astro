@@ -7,13 +7,14 @@ import StatusBadge from './StatusBadge.astro';
 export interface Props {
   match: Match;
   prediction?: Prediction | null;
+  readOnly?: boolean;
 }
 
-const { match, prediction = null } = Astro.props;
+const { match, prediction = null, readOnly = false } = Astro.props;
 
 const status = getMatchStatus(match);
 const ft = match.score?.ft;
-const disabled = status !== 'pending';
+const disabled = readOnly || status !== 'pending';
 const homeValue = prediction?.score1;
 const awayValue = prediction?.score2;
 const points = calculateMatchPoints(match, prediction);

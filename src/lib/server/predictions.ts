@@ -10,12 +10,16 @@ export interface StoredPredictionLite {
 
 export type PredictionsMap = Record<string, StoredPredictionLite>;
 
-export async function loadPredictions(cookies: AstroCookies): Promise<PredictionsMap> {
+export async function loadPredictions(
+  cookies: AstroCookies,
+  targetUid?: string,
+): Promise<PredictionsMap> {
   const user = await verifySession(cookies);
   if (!user) return {};
 
+  const uid = targetUid ?? user.uid;
   const db = getAdminFirestore();
-  const snap = await db.collection('users').doc(user.uid).collection('predictions').get();
+  const snap = await db.collection('users').doc(uid).collection('predictions').get();
 
   const out: PredictionsMap = {};
   for (const doc of snap.docs) {

@@ -1,4 +1,4 @@
-import { getAdminFirestore } from './firebase/admin';
+import { getAdminAuth, getAdminFirestore } from './firebase/admin';
 
 function stripDiacritics(s: string): string {
   return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -60,4 +60,28 @@ export async function displayNameFromUser(uid: string, email: string): Promise<s
     }
   }
   return nameFromEmail(email);
+}
+
+/**
+ * Resolves a display name for a user by UID, without needing the email
+ * up front. Reads users/{uid}.displayName from Firestore; if missing or
+ * empty, fetches the email from Firebase Auth and derives a name from it.
+ * The fallback is NOT persisted.
+ */
+export async function resolveDisplayName(uid: string): Promise<string> {
+  const db = getAdminFirestore();
+  const snap = await db.collection('users').doc(uid).get();
+  if (snap.exists) {
+    const data = snap.data();
+    if (typeof data?.displayName === 'string' && data.displayName.trim().length > 0) {
+      return data.displayName.trim();
+    }
+  }
+  try {
+    const auth = getAdminAuth();
+    const userRecord = await auth.getUser(uid);
+    return nameFromEmail(userRecord.email ?? '');
+  } catch {
+    return uid;
+  }
 }

@@ -8,9 +8,10 @@ export interface Props {
   dayNumber: number;
   matches: Match[];
   predictions?: Record<string, Prediction>;
+  readOnly?: boolean;
 }
 
-const { dateISO, dayNumber, matches, predictions = {} } = Astro.props;
+const { dateISO, dayNumber, matches, predictions = {}, readOnly = false } = Astro.props;
 
 const panelId = `day-panel-${dateISO}`;
 const formattedDate = formatMatchdayDate(dateISO);
@@ -20,6 +21,7 @@ const formattedDate = formatMatchdayDate(dateISO);
   class="bg-surface border border-border rounded-md overflow-hidden hover:border-border-strong transition-colors"
   data-accordion-item
   data-day-date={dateISO}
+  data-readonly={readOnly ? 'true' : undefined}
 >
   <button
     type="button"
@@ -59,19 +61,23 @@ const formattedDate = formatMatchdayDate(dateISO);
   >
     <div class="overflow-hidden">
       <div class="px-5 pb-2 divide-y divide-border/60">
-        {matches.map((match) => <MatchCard match={match} prediction={predictions[match.id] ?? null} />)}
+        {matches.map((match) => <MatchCard match={match} prediction={predictions[match.id] ?? null} readOnly={readOnly} />)}
       </div>
-      <div class="px-5 pb-4 pt-2 flex items-center justify-end gap-3" data-day-actions>
-        <span class="text-xs text-text-tertiary hidden" data-save-status aria-live="polite"></span>
-        <button
-          type="button"
-          class="text-xs font-semibold tracking-wider uppercase px-4 py-2 rounded-sm bg-arceus-secondary-950 text-arceus-primary-50 hover:bg-arceus-secondary-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-arceus-secondary-950"
-          data-save-day
-          disabled
-        >
-          Guardar día
-        </button>
-      </div>
+      {
+        !readOnly && (
+          <div class="px-5 pb-4 pt-2 flex items-center justify-end gap-3" data-day-actions>
+            <span class="text-xs text-text-tertiary hidden" data-save-status aria-live="polite"></span>
+            <button
+              type="button"
+              class="text-xs font-semibold tracking-wider uppercase px-4 py-2 rounded-sm bg-arceus-secondary-950 text-arceus-primary-50 hover:bg-arceus-secondary-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-arceus-secondary-950"
+              data-save-day
+              disabled
+            >
+              Guardar día
+            </button>
+          </div>
+        )
+      }
     </div>
   </div>
 </section>

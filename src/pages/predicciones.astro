@@ -5,15 +5,31 @@ import MatchdayAccordion from '../components/matches/MatchdayAccordion.astro';
 import { groupByDate } from '../lib/matches';
 import { loadTournament } from '../lib/sync';
 import { loadPredictions } from '../lib/server/predictions';
+import { resolveDisplayName } from '../lib/displayName';
+
+const currentUser = Astro.locals.user!;
+const targetUid = Astro.url.searchParams.get('uid');
+const isReadOnly = Boolean(targetUid) && targetUid !== currentUser.uid;
 
 let matchesByDate: Map<string, import('../lib/matches').Match[]> = new Map();
 let predictions: import('../lib/server/predictions').PredictionsMap = {};
 let loadError = false;
+let pageTitle = 'Predicciones de la fase de grupos';
+let pageHighlight = 'Predicciones';
+let showDescription = true;
 
 try {
   const tournament = await loadTournament();
   matchesByDate = groupByDate(tournament.matches);
-  predictions = await loadPredictions(Astro.cookies);
+  if (isReadOnly && targetUid) {
+    predictions = await loadPredictions(Astro.cookies, targetUid);
+    const name = await resolveDisplayName(targetUid);
+    pageTitle = `Predicciones de ${name}`;
+    pageHighlight = 'Predicciones de';
+    showDescription = false;
+  } else {
+    predictions = await loadPredictions(Astro.cookies);
+  }
 } catch (err) {
   console.error('predicciones: load failed', err);
   loadError = true;
@@ -27,10 +43,14 @@ const dates = [...matchesByDate.keys()].sort();
   description="Consulta y registra tus predicciones para los próximos partidos del mundial."
 >
   <div class="max-w-300 mx-auto px-6 md:px-8 py-8 md:py-12">
-    <PageHeader eyebrow="Tus pronósticos" title="Predicciones de la fase de grupos" highlight="Predicciones">
-      <Fragment slot="description">
-        Tocá cada día para ver los partidos y registrar tu marcador. <span aria-hidden="true">⚽</span>
-      </Fragment>
+    <PageHeader eyebrow="Tus pronósticos" title={pageTitle} highlight={pageHighlight}>
+      {
+        showDescription && (
+          <Fragment slot="description">
+            Tocá cada día para ver los partidos y registrar tu marcador. <span aria-hidden="true">⚽</span>
+          </Fragment>
+        )
+      }
     </PageHeader>
 
     {
@@ -41,13 +61,14 @@ const dates = [...matchesByDate.keys()].sort();
       ) : dates.length === 0 ? (
         <p class="text-sm text-text-tertiary py-8 text-center">No hay partidos disponibles.</p>
       ) : (
-        <div class="flex flex-col gap-3" data-accordion>
+        <div class="flex flex-col gap-3" data-accordion data-readonly={isReadOnly ? 'true' : undefined}>
           {dates.map((dateISO, idx) => (
             <MatchdayAccordion
               dateISO={dateISO}
               dayNumber={idx + 1}
               matches={matchesByDate.get(dateISO) ?? []}
               predictions={predictions}
+              readOnly={isReadOnly}
             />
           ))}
         </div>
