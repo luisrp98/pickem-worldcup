@@ -7,6 +7,7 @@ const { getAuth } = require('firebase-admin/auth');
 const { createHash } = require('node:crypto');
 const { buildMatchId } = require('./match-id.js');
 const { calculateMatchPoints, SCORING_VERSION } = require('./scoring.js');
+const { recalculateLeaderboard } = require('./leaderboard.js');
 
 setGlobalOptions({ maxInstances: 1, region: 'us-central1' });
 
@@ -311,6 +312,12 @@ exports.syncTournament = onSchedule(
     if (changedIds.length > 0) {
       console.log(`syncTournament: ${changedIds.length} matches changed, scoring predictions...`);
       await scoreMatches(changedIds, tournament.matches);
+    }
+
+    try {
+      await recalculateLeaderboard(db);
+    } catch (err) {
+      console.error('syncTournament: recalculateLeaderboard failed', err);
     }
   },
 );
