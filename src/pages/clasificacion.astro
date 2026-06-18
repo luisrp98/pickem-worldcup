@@ -3,7 +3,18 @@ import Layout from '../layouts/Layout.astro';
 import PageHeader from '../components/PageHeader.astro';
 import ShadowContainer from '../components/ShadowContainer.astro';
 import LeaderboardTable from '../components/leaderboard/LeaderboardTable.astro';
-import { leaderboard } from '../data/leaderboard';
+import type { LeaderboardEntry } from '../data/leaderboard';
+import { loadLeaderboard } from '../lib/server/leaderboard';
+
+let entries: LeaderboardEntry[] = [];
+let loadError = false;
+
+try {
+  entries = await loadLeaderboard(Astro.cookies);
+} catch (err) {
+  console.error('clasificacion: loadLeaderboard failed', err);
+  loadError = true;
+}
 ---
 
 <Layout
@@ -17,8 +28,18 @@ import { leaderboard } from '../data/leaderboard';
       </Fragment>
     </PageHeader>
 
-    <ShadowContainer bgClass="bg-white">
-      <LeaderboardTable entries={leaderboard} />
-    </ShadowContainer>
+    {
+      loadError ? (
+        <ShadowContainer bgClass="bg-white">
+          <p class="text-sm text-text-tertiary py-8 text-center">
+            No se pudo cargar la clasificación. Reintentá en unos minutos.
+          </p>
+        </ShadowContainer>
+      ) : (
+        <ShadowContainer bgClass="bg-white">
+          <LeaderboardTable entries={entries} />
+        </ShadowContainer>
+      )
+    }
   </div>
 </Layout>
