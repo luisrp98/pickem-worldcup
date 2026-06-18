@@ -3,6 +3,7 @@ import type { LeaderboardEntry } from '../../data/leaderboard';
 import PositionBadge from './PositionBadge.astro';
 import PositionChangeIndicator from './PositionChangeIndicator.astro';
 import Avatar from './Avatar.astro';
+import { initialsFromName } from '../../lib/displayName';
 
 export interface Props {
   entry: LeaderboardEntry;
@@ -29,14 +30,6 @@ const podiumBorder =
       : entry.currentPosition === 3
         ? 'border-l-4 border-bronze'
         : '';
-
-function initialsFromName(name: string): string {
-  const parts = name.trim().split(/\s+/);
-  if (parts.length >= 2) {
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  }
-  return name.slice(0, 2).toUpperCase();
-}
 
 const initials = initialsFromName(entry.displayName);
 ---
