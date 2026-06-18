@@ -1,6 +1,7 @@
 ---
 import type { LeaderboardEntry } from '../../data/leaderboard';
 import PositionBadge from './PositionBadge.astro';
+import PositionChangeIndicator from './PositionChangeIndicator.astro';
 import Avatar from './Avatar.astro';
 
 export interface Props {
@@ -10,23 +11,59 @@ export interface Props {
 const { entry } = Astro.props;
 
 const tdBase = 'px-5 py-3.5 border-b border-border text-sm';
+
+const podiumBg =
+  entry.currentPosition === 1
+    ? 'bg-gold/10'
+    : entry.currentPosition === 2
+      ? 'bg-silver/10'
+      : entry.currentPosition === 3
+        ? 'bg-bronze/10'
+        : '';
+
+const podiumBorder =
+  entry.currentPosition === 1
+    ? 'border-l-4 border-gold'
+    : entry.currentPosition === 2
+      ? 'border-l-4 border-silver'
+      : entry.currentPosition === 3
+        ? 'border-l-4 border-bronze'
+        : '';
+
+function initialsFromName(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+  return name.slice(0, 2).toUpperCase();
+}
+
+const initials = initialsFromName(entry.displayName);
 ---
 
-<tr class={entry.pos <= 3 ? 'bg-muted' : ''}>
+<tr class:list={[podiumBg, podiumBorder]}>
   <td class={tdBase}>
-    <PositionBadge pos={entry.pos} />
-  </td>
-  <td class={tdBase}>
-    <Avatar initials={entry.initials} />
-  </td>
-  <td class={tdBase}>
-    <span class="font-semibold text-text">{entry.name}</span>
+    <PositionBadge pos={entry.currentPosition} />
   </td>
   <td class={`${tdBase} max-sm:hidden`}>
-    <span class="font-medium text-text">{entry.result}</span>
+    <PositionChangeIndicator current={entry.currentPosition} previous={entry.previousPosition} />
+  </td>
+  <td class={tdBase}>
+    <Avatar initials={initials} />
+  </td>
+  <td class={tdBase}>
+    <a
+      href={`/predicciones?uid=${entry.uid}`}
+      class="font-semibold text-text hover:underline hover:text-text-hover-primary transition-colors"
+    >
+      {entry.displayName}
+    </a>
   </td>
   <td class={`${tdBase} max-sm:hidden`}>
-    <span class="font-medium text-text">{entry.score}</span>
+    <span class="font-medium text-text">{entry.correctResults}</span>
+  </td>
+  <td class={`${tdBase} max-sm:hidden`}>
+    <span class="font-medium text-text">{entry.correctScores}</span>
   </td>
   <td class={tdBase}>
     <span class="font-bold text-base text-text">{entry.points}</span>
