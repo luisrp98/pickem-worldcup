@@ -1,19 +1,52 @@
 ---
 import ShadowContainer from '../ShadowContainer.astro';
 
+export interface PointsStats {
+  points: number;
+  correctResults: number;
+  correctScores: number;
+  position: number | null;
+}
+
 export interface Props {
-  points?: number;
+  stats: PointsStats;
   href?: string;
   linkLabel?: string;
 }
 
-const { points = 0, href = '/clasificacion', linkLabel = 'Ver tabla' } = Astro.props;
+const {
+  stats,
+  href = '/clasificacion',
+  linkLabel = 'Ver tabla',
+} = Astro.props;
 ---
 
 <ShadowContainer>
   <div class="flex flex-col gap-3 p-2">
-    <h2 class="text-lg font-semibold">Tus puntos</h2>
-    <span class="text-5xl font-bold leading-none tabular-nums">{points} pts</span>
+    <div class="flex items-baseline justify-between gap-2">
+      <h2 class="text-lg font-semibold">Tus puntos</h2>
+      <span
+        class="text-xs font-semibold tracking-widest uppercase text-text-tertiary tabular-nums"
+        aria-label={stats.position != null ? `Posición ${stats.position}` : 'Sin posición en la clasificación'}
+      >
+        Pos. <span class="text-text font-bold">{stats.position ?? '—'}</span>
+      </span>
+    </div>
+    <span class="text-5xl font-bold leading-none tabular-nums">{stats.points} pts</span>
+    <div class="grid grid-cols-2 gap-3 pt-1">
+      <div class="flex flex-col gap-0.5">
+        <span class="text-[0.625rem] font-semibold tracking-widest uppercase text-text-tertiary">
+          Resultado
+        </span>
+        <span class="text-base font-bold tabular-nums">{stats.correctResults}</span>
+      </div>
+      <div class="flex flex-col gap-0.5">
+        <span class="text-[0.625rem] font-semibold tracking-widest uppercase text-text-tertiary">
+          Marcador
+        </span>
+        <span class="text-base font-bold tabular-nums">{stats.correctScores}</span>
+      </div>
+    </div>
     <div class="flex justify-end">
       <a href={href} class="text-xs font-semibold tracking-wider uppercase hover:underline">
         {linkLabel} &gt;

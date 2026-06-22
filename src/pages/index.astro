@@ -1,50 +1,125 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Greeting from '../components/home/Greeting.astro';
-import UpcomingMatchesCard from '../components/home/UpcomingMatchesCard.astro';
-import PointsSummaryCard from '../components/home/PointsSummaryCard.astro';
-import { getMatchStatus, parseKickoff } from '../lib/matches';
+import PageHeader from '../components/PageHeader.astro';
+import MatchdayAccordion from '../components/matches/MatchdayAccordion.astro';
+import ShadowContainer from '../components/ShadowContainer.astro';
+import PointsSummaryCard, { type PointsStats } from '../components/home/PointsSummaryCard.astro';
+import { formatMatchdayDate, parseKickoff, type Match } from '../lib/matches';
 import { loadTournament } from '../lib/sync';
+import { loadPredictions, type PredictionsMap } from '../lib/server/predictions';
+import { loadLeaderboard } from '../lib/server/leaderboard';
 
-const UPCOMING_LIMIT = 3;
+const currentUser = Astro.locals.user!;
+const friendlyName = currentUser.email.split('@')[0] ?? currentUser.email;
 
-const user = Astro.locals.user!;
-const friendlyName = user.email.split('@')[0] ?? user.email;
-
-let upcoming: import('../lib/matches').Match[] = [];
+let todayMatches: Match[] = [];
+let todayDateISO = '';
+let dayNumber = 1;
 let nextKickoffISO = '';
-let loadError = false;
+let predictions: PredictionsMap = {};
+let stats: PointsStats = {
+  points: 0,
+  correctResults: 0,
+  correctScores: 0,
+  position: null,
+};
+let matchesError = false;
 
 try {
   const tournament = await loadTournament();
   const now = new Date();
-  upcoming = tournament.matches
+  todayDateISO = now.toISOString().slice(0, 10);
+
+  const allDates = [...new Set(tournament.matches.map((m) => m.date))].sort();
+  const todayIndex = allDates.indexOf(todayDateISO);
+  dayNumber = todayIndex >= 0 ? todayIndex + 1 : 1;
+
+  todayMatches = tournament.matches
+    .filter((m) => m.date === todayDateISO)
     .map((m) => ({ match: m, kickoff: parseKickoff(m) }))
-    .filter(
-      (x) => x.kickoff !== null && getMatchStatus(x.match, now) === 'pending' && x.kickoff.getTime() > now.getTime(),
-    )
-    .sort((a, b) => (a.kickoff as Date).getTime() - (b.kickoff as Date).getTime())
-    .slice(0, UPCOMING_LIMIT)
+    .filter((x): x is { match: Match; kickoff: Date } => x.kickoff !== null)
+    .sort((a, b) => a.kickoff.getTime() - b.kickoff.getTime())
     .map((x) => x.match);
 
-  const nextKickoff = upcoming.length > 0 ? parseKickoff(upcoming[0]) : null;
-  if (nextKickoff) {
-    nextKickoffISO = nextKickoff.toISOString();
+  const firstMatch = todayMatches[0];
+  if (firstMatch) {
+    const kickoff = parseKickoff(firstMatch);
+    if (kickoff) nextKickoffISO = kickoff.toISOString();
   }
+
+  predictions = await loadPredictions(Astro.cookies);
 } catch (err) {
   console.error('home: load failed', err);
-  loadError = true;
+  matchesError = true;
 }
+
+try {
+  const entries = await loadLeaderboard();
+  const myEntry = entries.find((e) => e.uid === currentUser.uid);
+  if (myEntry) {
+    stats = {
+      points: myEntry.points,
+      correctResults: myEntry.correctResults,
+      correctScores: myEntry.correctScores,
+      position: myEntry.currentPosition,
+    };
+  }
+} catch (err) {
+  console.error('home: loadLeaderboard failed', err);
+}
+
+const todayFormatted = todayDateISO ? formatMatchdayDate(todayDateISO) : '';
 ---
 
 <Layout
   title="PICKEM — Predicciones Deportivas"
   description="Plataforma de predicciones deportivas. Registra tus pronósticos, consulta las reglas y sigue la clasificación."
 >
-  <Greeting name={friendlyName} />
-  <div class="flex flex-col gap-4">
-    <UpcomingMatchesCard matches={upcoming} nextKickoffISO={nextKickoffISO} loadError={loadError} />
-    <PointsSummaryCard points={0} />
+  <div class="max-w-300 mx-auto px-6 md:px-8 py-8 md:py-12">
+    <PageHeader eyebrow="Tu día" title={`¡Hola, ${friendlyName}!`} highlight={friendlyName}>
+      <Fragment slot="description">Tus partidos y puntos de hoy. <span aria-hidden="true">⚽</span></Fragment>
+    </PageHeader>
+
+    <div class="flex flex-col gap-4">
+      {
+        matchesError ? (
+          <ShadowContainer bgClass="bg-white">
+            <p class="text-sm text-text-tertiary py-8 text-center">
+              No se pudieron cargar los partidos. Reintentá en unos minutos.
+            </p>
+          </ShadowContainer>
+        ) : todayMatches.length === 0 ? (
+          <ShadowContainer bgClass="bg-white">
+            <div class="flex flex-col gap-3 p-2">
+              <h2 class="text-lg font-semibold">Próximos partidos</h2>
+              <p class="text-sm text-text-tertiary py-4 text-center">Hoy no hay partidos.</p>
+              <div class="flex justify-end">
+                <a
+                  href="/predicciones"
+                  class="text-xs font-semibold tracking-wider uppercase hover:underline"
+                >
+                  Mirá todas las jornadas →
+                </a>
+              </div>
+            </div>
+          </ShadowContainer>
+        ) : (
+          <div data-accordion>
+            <MatchdayAccordion
+              dateISO={todayDateISO}
+              dayNumber={dayNumber}
+              matches={todayMatches}
+              predictions={predictions}
+              label="Próximos partidos"
+              subtitle={todayFormatted}
+              countdownTargetISO={nextKickoffISO}
+            />
+          </div>
+        )
+      }
+
+      <PointsSummaryCard stats={stats} />
+    </div>
   </div>
 </Layout>
 
