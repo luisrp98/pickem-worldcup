@@ -7,9 +7,14 @@ import { loadTournament } from '../lib/sync';
 import { loadPredictions } from '../lib/server/predictions';
 import { resolveDisplayName } from '../lib/displayName';
 
-const currentUser = Astro.locals.user!;
+const currentUser = Astro.locals.user;
 const targetUid = Astro.url.searchParams.get('uid');
-const isReadOnly = Boolean(targetUid) && targetUid !== currentUser.uid;
+
+if (!currentUser && !targetUid) {
+  return Astro.redirect('/login?from=' + encodeURIComponent('/predicciones'));
+}
+
+const isReadOnly = Boolean(targetUid) && targetUid !== currentUser?.uid;
 
 let matchesByDate: Map<string, import('../lib/matches').Match[]> = new Map();
 let predictions: import('../lib/server/predictions').PredictionsMap = {};
@@ -27,7 +32,7 @@ try {
     pageTitle = `Predicciones de ${name}`;
     pageHighlight = 'Predicciones de';
     showDescription = false;
-  } else {
+  } else if (currentUser) {
     predictions = await loadPredictions(Astro.cookies);
   }
 } catch (err) {

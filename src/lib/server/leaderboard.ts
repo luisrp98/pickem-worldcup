@@ -1,7 +1,5 @@
-import type { AstroCookies } from 'astro';
 import type { LeaderboardEntry } from '../../data/leaderboard';
 import { getAdminAuth, getAdminFirestore } from '../firebase/admin';
-import { verifySession } from '../firebase/session';
 import { displayNameFromUser } from '../displayName';
 
 interface UserAggregate {
@@ -58,12 +56,7 @@ async function aggregateUser(uid: string, email: string): Promise<UserAggregate>
   };
 }
 
-export async function loadLeaderboard(cookies: AstroCookies): Promise<LeaderboardEntry[]> {
-  const sessionUser = await verifySession(cookies);
-  if (!sessionUser) {
-    return [];
-  }
-
+export async function loadLeaderboard(): Promise<LeaderboardEntry[]> {
   const auth = getAdminAuth();
   const listResult = await auth.listUsers(1000);
 

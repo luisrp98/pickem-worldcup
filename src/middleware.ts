@@ -2,7 +2,16 @@ import { defineMiddleware } from 'astro:middleware';
 import { verifySession } from './lib/firebase/session';
 
 const PUBLIC_EXACT = new Set(['/login', '/logout']);
-const PUBLIC_PREFIXES = ['/_astro/', '/_image', '/favicon', '/api/auth/', '/assets/', '/reglas'];
+const PUBLIC_PREFIXES = [
+  '/_astro/',
+  '/_image',
+  '/favicon',
+  '/api/auth/',
+  '/assets/',
+  '/reglas',
+  '/clasificacion',
+  '/predicciones',
+];
 
 function normalizePath(pathname: string): string {
   if (pathname.length > 1 && pathname.endsWith('/')) {
@@ -18,14 +27,10 @@ function isPublicPath(pathname: string): boolean {
 }
 
 export const onRequest = defineMiddleware(async (context, next) => {
-  if (isPublicPath(context.url.pathname)) {
-    return next();
-  }
-
   const user = await verifySession(context.cookies);
   context.locals.user = user;
 
-  if (!user) {
+  if (!user && !isPublicPath(context.url.pathname)) {
     const from = encodeURIComponent(context.url.pathname + context.url.search);
     return context.redirect(`/login?from=${from}`);
   }

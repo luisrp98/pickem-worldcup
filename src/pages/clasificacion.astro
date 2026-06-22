@@ -11,7 +11,7 @@ let loadError = false;
 const currentUserUid = Astro.locals.user?.uid;
 
 try {
-  entries = await loadLeaderboard(Astro.cookies);
+  entries = await loadLeaderboard();
 } catch (err) {
   console.error('clasificacion: loadLeaderboard failed', err);
   loadError = true;
