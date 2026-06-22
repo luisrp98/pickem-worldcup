@@ -2,6 +2,7 @@
 import type { Match, Prediction } from '../../lib/matches';
 import { formatMatchdayDate } from '../../lib/matches';
 import MatchCard from './MatchCard.astro';
+import Countdown from '../home/Countdown.astro';
 
 export interface Props {
   dateISO: string;
@@ -9,12 +10,26 @@ export interface Props {
   matches: Match[];
   predictions?: Record<string, Prediction>;
   readOnly?: boolean;
+  label?: string;
+  subtitle?: string;
+  countdownTargetISO?: string;
 }
 
-const { dateISO, dayNumber, matches, predictions = {}, readOnly = false } = Astro.props;
+const {
+  dateISO,
+  dayNumber,
+  matches,
+  predictions = {},
+  readOnly = false,
+  label,
+  subtitle,
+  countdownTargetISO,
+} = Astro.props;
 
 const panelId = `day-panel-${dateISO}`;
 const formattedDate = formatMatchdayDate(dateISO);
+const title = label ?? formattedDate;
+const subtitleText = subtitle ?? `Día ${dayNumber} de la fase de grupos`;
 ---
 
 <section
@@ -31,11 +46,19 @@ const formattedDate = formatMatchdayDate(dateISO);
     data-accordion-trigger
   >
     <div class="flex flex-col gap-0.5 min-w-0">
-      <span class="text-xl md:text-2xl font-bold leading-tight tracking-wide truncate">{formattedDate}</span>
+      <span class="text-xl md:text-2xl font-bold leading-tight tracking-wide truncate">{title}</span>
       <span class="text-xs font-semibold tracking-widest uppercase text-text-tertiary">
-        Día {dayNumber} de la fase de grupos
+        {subtitleText}
       </span>
     </div>
+    {
+      countdownTargetISO && (
+        <Countdown
+          targetISO={countdownTargetISO}
+          class="hidden sm:block ml-auto text-sm font-medium text-text-secondary shrink-0"
+        />
+      )
+    }
     <span
       class="shrink-0 size-9 flex items-center justify-center rounded-sm bg-muted text-text-secondary transition-transform duration-300"
       data-accordion-icon
