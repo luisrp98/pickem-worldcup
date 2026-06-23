@@ -94,27 +94,28 @@ const todayFormatted = todayDateISO ? formatMatchdayDate(todayDateISO) : '';
               <h2 class="text-lg font-semibold">Próximos partidos</h2>
               <p class="text-sm text-text-tertiary py-4 text-center">Hoy no hay partidos.</p>
               <div class="flex justify-end">
-                <a
-                  href="/predicciones"
-                  class="text-xs font-semibold tracking-wider uppercase hover:underline"
-                >
+                <a href="/predicciones" class="text-xs font-semibold tracking-wider uppercase hover:underline">
                   Mirá todas las jornadas →
                 </a>
               </div>
             </div>
           </ShadowContainer>
         ) : (
-          <div data-accordion>
-            <MatchdayAccordion
-              dateISO={todayDateISO}
-              dayNumber={dayNumber}
-              matches={todayMatches}
-              predictions={predictions}
-              label="Próximos partidos"
-              subtitle={todayFormatted}
-              countdownTargetISO={nextKickoffISO}
-            />
-          </div>
+          <ShadowContainer bgClass="bg-arceus-accent-50 border border-arceus-accent-200">
+            <div data-accordion>
+              <MatchdayAccordion
+                bare
+                alwaysOpen
+                dateISO={todayDateISO}
+                dayNumber={dayNumber}
+                matches={todayMatches}
+                predictions={predictions}
+                label="Próximos partidos"
+                subtitle={todayFormatted}
+                countdownTargetISO={nextKickoffISO}
+              />
+            </div>
+          </ShadowContainer>
         )
       }
 

@@ -13,6 +13,8 @@ export interface Props {
   label?: string;
   subtitle?: string;
   countdownTargetISO?: string;
+  bare?: boolean;
+  alwaysOpen?: boolean;
 }
 
 const {
@@ -24,6 +26,8 @@ const {
   label,
   subtitle,
   countdownTargetISO,
+  bare = false,
+  alwaysOpen = false,
 } = Astro.props;
 
 const panelId = `day-panel-${dateISO}`;
@@ -33,17 +37,24 @@ const subtitleText = subtitle ?? `Día ${dayNumber} de la fase de grupos`;
 ---
 
 <section
-  class="bg-surface border border-border rounded-md overflow-hidden hover:border-border-strong transition-colors"
+  class:list={[
+    'rounded-md overflow-hidden',
+    !bare && 'bg-surface border border-border hover:border-border-strong transition-colors',
+  ]}
   data-accordion-item
   data-day-date={dateISO}
   data-readonly={readOnly ? 'true' : undefined}
 >
   <button
     type="button"
-    class="w-full flex items-center justify-between gap-4 px-5 py-4 text-left cursor-pointer"
-    aria-expanded="false"
-    aria-controls={panelId}
-    data-accordion-trigger
+    class:list={[
+      'w-full flex items-center justify-between gap-4 px-5 py-4 text-left',
+      !alwaysOpen && 'cursor-pointer',
+    ]}
+    disabled={alwaysOpen}
+    data-accordion-trigger={!alwaysOpen ? '' : undefined}
+    aria-expanded={!alwaysOpen ? 'false' : undefined}
+    aria-controls={!alwaysOpen ? panelId : undefined}
   >
     <div class="flex flex-col gap-0.5 min-w-0">
       <span class="text-xl md:text-2xl font-bold leading-tight tracking-wide truncate">{title}</span>
@@ -59,27 +70,34 @@ const subtitleText = subtitle ?? `Día ${dayNumber} de la fase de grupos`;
         />
       )
     }
-    <span
-      class="shrink-0 size-9 flex items-center justify-center rounded-sm bg-muted text-text-secondary transition-transform duration-300"
-      data-accordion-icon
-      aria-hidden="true"
-    >
-      <svg
-        class="size-4"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <path d="m6 9 6 6 6-6"></path>
-      </svg>
-    </span>
+    {
+      !alwaysOpen && (
+        <span
+          class="shrink-0 size-9 flex items-center justify-center rounded-sm bg-muted text-text-secondary transition-transform duration-300"
+          data-accordion-icon
+          aria-hidden="true"
+        >
+          <svg
+            class="size-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="m6 9 6 6 6-6"></path>
+          </svg>
+        </span>
+      )
+    }
   </button>
   <div
     id={panelId}
-    class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out"
+    class:list={[
+      'grid transition-[grid-template-rows] duration-300 ease-out',
+      alwaysOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+    ]}
     data-accordion-panel
   >
     <div class="overflow-hidden">
