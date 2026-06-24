@@ -35,8 +35,15 @@ const teams = Object.keys(flags).sort((a, b) => a.localeCompare(b, 'es'));
     <form
       class="mt-6 flex flex-col gap-4"
       data-crystal-ball-form
+      data-cb-teams={JSON.stringify(teams)}
       novalidate
     >
+      <script
+        type="application/json"
+        data-cb-config
+        set:html={JSON.stringify(crystalBallQuestions)}
+      />
+
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         {
           crystalBallQuestions.map((q) => (
@@ -70,58 +77,6 @@ const teams = Object.keys(flags).sort((a, b) => a.localeCompare(b, 'es'));
 </Layout>
 
 <script>
-  function mountCrystalBallForm(): void {
-    const form = document.querySelector<HTMLFormElement>('[data-crystal-ball-form]');
-    if (!form) return;
-
-    const status = form.querySelector<HTMLElement>('[data-cb-save-status]');
-    const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
-
-    function hasAnyValue(): boolean {
-      const data = new FormData(form!);
-      for (const value of data.values()) {
-        if (typeof value === 'string' && value.trim() !== '') return true;
-      }
-      return false;
-    }
-
-    function refreshSubmitState(): void {
-      if (submit) submit.disabled = !hasAnyValue();
-    }
-
-    refreshSubmitState();
-    form.addEventListener('input', refreshSubmitState);
-    form.addEventListener('change', refreshSubmitState);
-
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-
-      const data = new FormData(form);
-      const payload: Record<string, string> = {};
-      for (const [key, value] of data.entries()) {
-        if (typeof value === 'string') {
-          payload[key] = value;
-        }
-      }
-
-      console.log('Crystal Ball submit:', payload);
-
-      if (status) {
-        status.textContent = 'Cambios guardados — próximamente';
-        status.classList.remove('hidden');
-        status.classList.remove('text-text-tertiary');
-        status.classList.add('text-arceus-accent-700');
-        setTimeout(() => {
-          status.classList.add('hidden');
-          status.classList.remove('text-arceus-accent-700');
-          status.classList.add('text-text-tertiary');
-          status.textContent = '';
-        }, 2000);
-      }
-
-      refreshSubmitState();
-    });
-  }
-
-  mountCrystalBallForm();
+  import { mountCrystalBallController } from '../../scripts/crystalBallController';
+  mountCrystalBallController();
 </script>
