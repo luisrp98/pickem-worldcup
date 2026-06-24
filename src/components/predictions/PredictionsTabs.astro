@@ -1,0 +1,46 @@
+---
+export type PredictionsSection = 'groups' | 'knockouts' | 'crystal-ball';
+
+export interface Props {
+  current: PredictionsSection;
+}
+
+const { current } = Astro.props;
+
+const tabs: Array<{ id: PredictionsSection; label: string; href: string }> = [
+  { id: 'groups', label: 'Groups', href: '/predicciones' },
+  { id: 'knockouts', label: 'Knockouts', href: '/predicciones/knockouts' },
+  { id: 'crystal-ball', label: 'Crystal Ball', href: '/predicciones/crystal-ball' },
+];
+---
+
+<nav
+  class="flex items-center gap-1 sm:gap-2 border-b border-border"
+  aria-label="Secciones de predicciones"
+>
+  {
+    tabs.map((tab) => {
+      const isActive = tab.id === current;
+      return (
+        <a
+          href={tab.href}
+          aria-current={isActive ? 'page' : undefined}
+          class:list={[
+            'px-3 sm:px-4 py-2.5 text-xs sm:text-sm font-semibold tracking-widest uppercase transition-colors relative',
+            isActive
+              ? 'text-text-primary'
+              : 'text-text-secondary hover:text-text-hover-primary',
+          ]}
+        >
+          {tab.label}
+          {isActive && (
+            <span
+              class="absolute left-3 right-3 sm:left-4 sm:right-4 -bottom-px h-0.5 bg-arceus-accent-500"
+              aria-hidden="true"
+            />
+          )}
+        </a>
+      );
+    })
+  }
+</nav>

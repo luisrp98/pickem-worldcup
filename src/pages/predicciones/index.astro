@@ -1,12 +1,13 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import PageHeader from '../components/PageHeader.astro';
-import ShadowContainer from '../components/ShadowContainer.astro';
-import PredictionsSection, { type MatchDay } from '../components/matches/PredictionsSection.astro';
-import { groupByDate, splitByTime } from '../lib/matches';
-import { loadTournament } from '../lib/sync';
-import { loadPredictions } from '../lib/server/predictions';
-import { resolveDisplayName } from '../lib/displayName';
+import Layout from '../../layouts/Layout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import ShadowContainer from '../../components/ShadowContainer.astro';
+import PredictionsTabs from '../../components/predictions/PredictionsTabs.astro';
+import PredictionsSection, { type MatchDay } from '../../components/matches/PredictionsSection.astro';
+import { groupByDate, splitByTime } from '../../lib/matches';
+import { loadTournament } from '../../lib/sync';
+import { loadPredictions } from '../../lib/server/predictions';
+import { resolveDisplayName } from '../../lib/displayName';
 
 const currentUser = Astro.locals.user;
 const targetUid = Astro.url.searchParams.get('uid');
@@ -19,7 +20,7 @@ const isReadOnly = Boolean(targetUid) && targetUid !== currentUser?.uid;
 
 let pastDays: MatchDay[] = [];
 let upcomingDays: MatchDay[] = [];
-let predictions: import('../lib/server/predictions').PredictionsMap = {};
+let predictions: import('../../lib/server/predictions').PredictionsMap = {};
 let loadError = false;
 let pageTitle = 'Predicciones de la fase de grupos';
 let pageHighlight = 'Predicciones';
@@ -82,6 +83,8 @@ const hasAnyMatch = pastDays.length > 0 || upcomingDays.length > 0;
       }
     </PageHeader>
 
+    <PredictionsTabs current="groups" />
+
     {
       loadError ? (
         <p class="text-sm text-text-tertiary py-8 text-center">
@@ -120,6 +123,6 @@ const hasAnyMatch = pastDays.length > 0 || upcomingDays.length > 0;
 </Layout>
 
 <script>
-  import { mountPredictionsController } from '../scripts/predictionsController';
+  import { mountPredictionsController } from '../../scripts/predictionsController';
   mountPredictionsController();
 </script>

@@ -1,0 +1,43 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import ShadowContainer from '../../components/ShadowContainer.astro';
+import PredictionsTabs from '../../components/predictions/PredictionsTabs.astro';
+
+const currentUser = Astro.locals.user;
+
+if (!currentUser) {
+  return Astro.redirect('/login?from=' + encodeURIComponent('/predicciones/knockouts'));
+}
+---
+
+<Layout
+  title="Knockouts — PICKEM"
+  description="Pronósticos de la fase eliminatoria del mundial."
+>
+  <div class="max-w-300 mx-auto px-6 md:px-8 py-8 md:py-12">
+    <PageHeader
+      eyebrow="Fase eliminatoria"
+      title="Predicciones de knockouts"
+      highlight="knockouts"
+    >
+      <Fragment slot="description">
+        Acá vas a poder pronosticar los cruces de la fase eliminatoria. <span aria-hidden="true">🏆</span>
+      </Fragment>
+    </PageHeader>
+
+    <PredictionsTabs current="knockouts" />
+
+    <div class="mt-6">
+      <ShadowContainer bgClass="bg-white">
+        <div class="flex flex-col items-center justify-center gap-2 p-8 text-center">
+          <span class="text-3xl" aria-hidden="true">🚧</span>
+          <p class="text-base font-semibold text-text">Próximamente</p>
+          <p class="text-sm text-text-tertiary">
+            Estamos preparando esta sección. Volvé pronto para pronosticar la fase eliminatoria.
+          </p>
+        </div>
+      </ShadowContainer>
+    </div>
+  </div>
+</Layout>
