@@ -59,6 +59,7 @@ const teams = Object.keys(flags).sort((a, b) => a.localeCompare(b, 'es'));
         />
         <button
           type="submit"
+          disabled
           class="text-xs font-semibold tracking-wider uppercase px-4 py-2 rounded-sm bg-arceus-secondary-950 text-arceus-primary-50 hover:bg-arceus-secondary-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-arceus-secondary-950"
         >
           Guardar predicciones
@@ -75,6 +76,22 @@ const teams = Object.keys(flags).sort((a, b) => a.localeCompare(b, 'es'));
 
     const status = form.querySelector<HTMLElement>('[data-cb-save-status]');
     const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+
+    function hasAnyValue(): boolean {
+      const data = new FormData(form!);
+      for (const value of data.values()) {
+        if (typeof value === 'string' && value.trim() !== '') return true;
+      }
+      return false;
+    }
+
+    function refreshSubmitState(): void {
+      if (submit) submit.disabled = !hasAnyValue();
+    }
+
+    refreshSubmitState();
+    form.addEventListener('input', refreshSubmitState);
+    form.addEventListener('change', refreshSubmitState);
 
     form.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -102,12 +119,7 @@ const teams = Object.keys(flags).sort((a, b) => a.localeCompare(b, 'es'));
         }, 2000);
       }
 
-      if (submit) {
-        submit.disabled = true;
-        setTimeout(() => {
-          submit.disabled = false;
-        }, 800);
-      }
+      refreshSubmitState();
     });
   }
 
