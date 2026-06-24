@@ -1,0 +1,115 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import PredictionsTabs from '../../components/predictions/PredictionsTabs.astro';
+import CrystalBallCard from '../../components/crystalBall/CrystalBallCard.astro';
+import { crystalBallQuestions } from '../../data/crystalBallQuestions';
+import { flags } from '../../lib/matches';
+
+const currentUser = Astro.locals.user;
+
+if (!currentUser) {
+  return Astro.redirect('/login?from=' + encodeURIComponent('/predicciones/crystal-ball'));
+}
+
+const teams = Object.keys(flags).sort((a, b) => a.localeCompare(b, 'es'));
+---
+
+<Layout
+  title="Crystal Ball — PICKEM"
+  description="Predicciones especiales del mundial: campeón, máximo goleador y mejor jugador."
+>
+  <div class="max-w-300 mx-auto px-6 md:px-8 py-8 md:py-12">
+    <PageHeader
+      eyebrow="Predicciones especiales"
+      title="Crystal Ball"
+      highlight="Crystal Ball"
+    >
+      <Fragment slot="description">
+        Pronostica los grandes premios del mundial. <span aria-hidden="true">🔮</span>
+      </Fragment>
+    </PageHeader>
+
+    <PredictionsTabs current="crystal-ball" />
+
+    <form
+      class="mt-6 flex flex-col gap-4"
+      data-crystal-ball-form
+      novalidate
+    >
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {
+          crystalBallQuestions.map((q) => (
+            <CrystalBallCard
+              id={q.id}
+              emoji={q.emoji}
+              question={q.question}
+              inputType={q.inputType}
+              value=""
+              options={q.inputType === 'team' ? teams : undefined}
+            />
+          ))
+        }
+      </div>
+      <div class="flex items-center justify-end gap-3">
+        <span
+          class="text-xs text-text-tertiary hidden"
+          data-cb-save-status
+          aria-live="polite"
+        />
+        <button
+          type="submit"
+          class="text-xs font-semibold tracking-wider uppercase px-4 py-2 rounded-sm bg-arceus-secondary-950 text-arceus-primary-50 hover:bg-arceus-secondary-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-arceus-secondary-950"
+        >
+          Guardar predicciones
+        </button>
+      </div>
+    </form>
+  </div>
+</Layout>
+
+<script>
+  function mountCrystalBallForm(): void {
+    const form = document.querySelector<HTMLFormElement>('[data-crystal-ball-form]');
+    if (!form) return;
+
+    const status = form.querySelector<HTMLElement>('[data-cb-save-status]');
+    const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const data = new FormData(form);
+      const payload: Record<string, string> = {};
+      for (const [key, value] of data.entries()) {
+        if (typeof value === 'string') {
+          payload[key] = value;
+        }
+      }
+
+      console.log('Crystal Ball submit:', payload);
+
+      if (status) {
+        status.textContent = 'Cambios guardados — próximamente';
+        status.classList.remove('hidden');
+        status.classList.remove('text-text-tertiary');
+        status.classList.add('text-arceus-accent-700');
+        setTimeout(() => {
+          status.classList.add('hidden');
+          status.classList.remove('text-arceus-accent-700');
+          status.classList.add('text-text-tertiary');
+          status.textContent = '';
+        }, 2000);
+      }
+
+      if (submit) {
+        submit.disabled = true;
+        setTimeout(() => {
+          submit.disabled = false;
+        }, 800);
+      }
+    });
+  }
+
+  mountCrystalBallForm();
+</script>
