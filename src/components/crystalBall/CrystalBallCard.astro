@@ -1,0 +1,80 @@
+---
+import type { CrystalBallInputType } from '../../data/crystalBallQuestions';
+
+export interface Props {
+  id: string;
+  emoji: string;
+  question: string;
+  inputType: CrystalBallInputType;
+  value?: string;
+  options?: string[];
+  placeholder?: string;
+  disabled?: boolean;
+  name?: string;
+}
+
+const {
+  id,
+  emoji,
+  question,
+  inputType,
+  value = '',
+  options = [],
+  placeholder,
+  disabled = false,
+  name,
+} = Astro.props;
+
+const fieldName = name ?? `cb-${id}`;
+const inputId = `cb-input-${id}`;
+
+const inputClass =
+  'w-full px-3 py-2 text-base border border-border rounded-sm bg-white text-text outline-none focus:border-text focus:bg-surface transition-[border-color,background] placeholder:text-text-tertiary disabled:bg-muted disabled:opacity-60 disabled:cursor-not-allowed';
+---
+
+<article class="bg-surface border border-border rounded-md p-6 hover:border-border-strong transition-colors flex flex-col">
+  <header class="flex flex-col items-center text-center gap-2.5 mb-4">
+    <span
+      class="w-14 h-14 rounded-full bg-arceus-accent-400 text-2xl flex items-center justify-center"
+      aria-hidden="true"
+    >
+      {emoji}
+    </span>
+    <h3 class="text-lg md:text-xl font-bold leading-tight">
+      {question}
+    </h3>
+  </header>
+  <div class="flex-1">
+    {
+      inputType === 'team' ? (
+        <select
+          id={inputId}
+          name={fieldName}
+          disabled={disabled}
+          aria-label={question}
+          class={inputClass}
+        >
+          <option value="" disabled selected={value === ''}>
+            Seleccioná un equipo
+          </option>
+          {options.map((opt) => (
+            <option value={opt} selected={opt === value}>
+              {opt}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <input
+          id={inputId}
+          name={fieldName}
+          type="text"
+          value={value}
+          disabled={disabled}
+          placeholder={placeholder ?? (inputType === 'player' ? 'Nombre del jugador' : 'Tu respuesta')}
+          aria-label={question}
+          class={inputClass}
+        />
+      )
+    }
+  </div>
+</article>
