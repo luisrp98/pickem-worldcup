@@ -77,6 +77,24 @@ export function getMatchStatus(match: Match, now: Date = new Date()): MatchStatu
   return 'closed';
 }
 
+export interface MatchPartition {
+  upcoming: Match[];
+  past: Match[];
+}
+
+export function splitByTime(matches: Match[], now: Date = new Date()): MatchPartition {
+  const upcoming: Match[] = [];
+  const past: Match[] = [];
+  for (const match of matches) {
+    if (getMatchStatus(match, now) === 'closed') {
+      past.push(match);
+    } else {
+      upcoming.push(match);
+    }
+  }
+  return { upcoming, past };
+}
+
 export function groupByDate(matches: Match[]): Map<string, Match[]> {
   const map = new Map<string, Match[]>();
   for (const match of matches) {
