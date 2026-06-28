@@ -61,51 +61,73 @@ if (isReadOnly && targetUid) {
 
     <PredictionsTabs current="crystal-ball" />
 
-    <form
-      class="mt-6 flex flex-col gap-4"
-      data-crystal-ball-form
-      data-cb-teams={JSON.stringify(teams)}
-      novalidate
-    >
-      <script
-        type="application/json"
-        data-cb-config
-        set:html={JSON.stringify(crystalBallQuestions)}
-      />
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {
-          crystalBallQuestions.map((q) => (
-            <CrystalBallCard
-              id={q.id}
-              emoji={q.emoji}
-              question={q.question}
-              inputType={q.inputType}
-              value={savedAnswers[q.id] ?? ''}
-              options={q.inputType === 'team' ? teams : undefined}
-            />
-          ))
-        }
-      </div>
-      <div class="flex items-center justify-end gap-3">
-        <span
-          class="text-xs text-text-tertiary hidden"
-          data-cb-save-status
-          aria-live="polite"
-        />
-        <button
-          type="submit"
-          disabled
-          class="text-xs font-semibold tracking-wider uppercase px-4 py-2 rounded-sm bg-arceus-secondary-950 text-arceus-primary-50 hover:bg-arceus-secondary-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-arceus-secondary-950"
+    {
+      isReadOnly ? (
+        <div class="mt-6 flex flex-col gap-4" data-crystal-ball-readonly>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {crystalBallQuestions.map((q) => (
+              <CrystalBallCard
+                id={q.id}
+                emoji={q.emoji}
+                question={q.question}
+                inputType={q.inputType}
+                value={savedAnswers[q.id] ?? ''}
+                options={q.inputType === 'team' ? teams : undefined}
+                disabled
+              />
+            ))}
+          </div>
+        </div>
+      ) : (
+        <form
+          class="mt-6 flex flex-col gap-4"
+          data-crystal-ball-form
+          data-cb-teams={JSON.stringify(teams)}
+          novalidate
         >
-          Guardar predicciones
-        </button>
-      </div>
-    </form>
+          <script
+            type="application/json"
+            data-cb-config
+            set:html={JSON.stringify(crystalBallQuestions)}
+          />
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {crystalBallQuestions.map((q) => (
+              <CrystalBallCard
+                id={q.id}
+                emoji={q.emoji}
+                question={q.question}
+                inputType={q.inputType}
+                value={savedAnswers[q.id] ?? ''}
+                options={q.inputType === 'team' ? teams : undefined}
+              />
+            ))}
+          </div>
+          <div class="flex items-center justify-end gap-3">
+            <span
+              class="text-xs text-text-tertiary hidden"
+              data-cb-save-status
+              aria-live="polite"
+            />
+            <button
+              type="submit"
+              disabled
+              class="text-xs font-semibold tracking-wider uppercase px-4 py-2 rounded-sm bg-arceus-secondary-950 text-arceus-primary-50 hover:bg-arceus-secondary-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-arceus-secondary-950"
+            >
+              Guardar predicciones
+            </button>
+          </div>
+        </form>
+      )
+    }
   </div>
 </Layout>
 
-<script>
-  import { mountCrystalBallController } from '../../scripts/crystalBallController';
-  mountCrystalBallController();
-</script>
+{
+  !isReadOnly && (
+    <script>
+      import { mountCrystalBallController } from '../../scripts/crystalBallController';
+      mountCrystalBallController();
+    </script>
+  )
+}
