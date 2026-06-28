@@ -1,3 +1,5 @@
+import data from './crystalBallQuestions.json';
+
 export type CrystalBallInputType = 'team' | 'player' | 'text';
 
 export interface CrystalBallQuestion {
@@ -5,10 +7,7 @@ export interface CrystalBallQuestion {
   emoji: string;
   question: string;
   inputType: CrystalBallInputType;
+  points: number;
 }
 
-export const crystalBallQuestions: CrystalBallQuestion[] = [
-  { id: 'champion', emoji: '🏆', question: '¿Quién va a ser el campeón?', inputType: 'team' },
-  { id: 'top-scorer', emoji: '⚽', question: '¿Quién va a ser el máximo goleador?', inputType: 'player' },
-  { id: 'best-player', emoji: '🌟', question: '¿Quién va a ser el mejor jugador?', inputType: 'player' },
-];
+export const crystalBallQuestions: CrystalBallQuestion[] = data as CrystalBallQuestion[];

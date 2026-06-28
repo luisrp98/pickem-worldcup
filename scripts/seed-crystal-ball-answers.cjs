@@ -18,11 +18,7 @@ initializeApp({
 
 const db = getFirestore();
 
-const CRYSTAL_BALL_CONFIG = [
-  { id: 'champion',    points: 10 },
-  { id: 'top-scorer',  points: 7  },
-  { id: 'best-player', points: 5  },
-];
+const CRYSTAL_BALL_CONFIG = require('../src/data/crystalBallQuestions.json');
 
 async function main() {
   const ref = db.collection('crystalBall').doc('answers');

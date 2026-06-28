@@ -1,0 +1,23 @@
+[
+  {
+    "id": "champion",
+    "emoji": "🏆",
+    "question": "¿Quién va a ser el campeón?",
+    "inputType": "team",
+    "points": 10
+  },
+  {
+    "id": "top-scorer",
+    "emoji": "⚽",
+    "question": "¿Quién va a ser el máximo goleador?",
+    "inputType": "player",
+    "points": 7
+  },
+  {
+    "id": "best-player",
+    "emoji": "🌟",
+    "question": "¿Quién va a ser el mejor jugador?",
+    "inputType": "player",
+    "points": 5
+  }
+]
