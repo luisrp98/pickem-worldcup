@@ -28,8 +28,8 @@ function buildTemplate(config) {
   const out = [];
   for (const q of config) {
     if (isTiered(q)) {
-      for (const [value, points] of Object.entries(q.pointsByValue)) {
-        out.push({ id: q.id, ans: value, points });
+      for (const [, points] of Object.entries(q.pointsByValue)) {
+        out.push({ id: q.id, ans: null, points });
       }
     } else {
       out.push({ id: q.id, ans: null, points: q.points });
