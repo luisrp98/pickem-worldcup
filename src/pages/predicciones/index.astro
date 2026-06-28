@@ -22,8 +22,9 @@ let pastDays: MatchDay[] = [];
 let upcomingDays: MatchDay[] = [];
 let predictions: import('../../lib/server/predictions').PredictionsMap = {};
 let loadError = false;
-let pageTitle = 'Predicciones de la fase de grupos';
-let pageHighlight = 'Predicciones';
+let pageTitle = 'Predicciones de grupos';
+let layoutTitle = 'Predicciones — PICKEM';
+let pageHighlight = 'Predicciones de grupos';
 let showDescription = true;
 
 try {
@@ -54,8 +55,9 @@ try {
   if (isReadOnly && targetUid) {
     predictions = await loadPredictions(Astro.cookies, targetUid);
     const name = await resolveDisplayName(targetUid);
-    pageTitle = `Predicciones de ${name}`;
-    pageHighlight = 'Predicciones de';
+    pageTitle = `Predicciones de grupos de ${name}`;
+    layoutTitle = `Predicciones de grupos de ${name} — PICKEM`;
+    pageHighlight = 'Predicciones de grupos de';
     showDescription = false;
   } else if (currentUser) {
     predictions = await loadPredictions(Astro.cookies);
@@ -69,7 +71,7 @@ const hasAnyMatch = pastDays.length > 0 || upcomingDays.length > 0;
 ---
 
 <Layout
-  title="Predicciones — PICKEM"
+  title={layoutTitle}
   description="Consulta y registra tus predicciones para los próximos partidos del mundial."
 >
   <div class="max-w-300 mx-auto px-6 md:px-8 py-8 md:py-12">
