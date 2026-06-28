@@ -41,18 +41,14 @@ async function loadOfficialCrystalBallAnswers(): Promise<Map<string, string>> {
   const entries = snap.data()?.entries;
   if (!Array.isArray(entries)) return map;
   for (const e of entries) {
-    if (e && typeof e.id === 'string' && typeof e.ans === 'string') {
+    if (e && typeof e.id === 'string' && typeof e.ans === 'string' && e.ans !== '') {
       map.set(e.id, e.ans);
     }
   }
   return map;
 }
 
-async function aggregateUser(
-  uid: string,
-  email: string,
-  officialAnswers: Map<string, string>,
-): Promise<UserAggregate> {
+async function aggregateUser(uid: string, email: string, officialAnswers: Map<string, string>): Promise<UserAggregate> {
   const db = getAdminFirestore();
 
   const [userSnap, predictionsSnap, crystalBallSnap] = await Promise.all([

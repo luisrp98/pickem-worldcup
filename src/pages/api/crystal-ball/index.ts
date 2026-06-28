@@ -34,6 +34,11 @@ function isValidTextValue(value: string): boolean {
   return trimmed.length > 0 && trimmed.length <= MAX_TEXT_LENGTH;
 }
 
+function isValidSelectValue(value: string, options: ReadonlyArray<{ value: string }> | undefined): boolean {
+  if (!options || options.length === 0) return false;
+  return options.some((o) => o.value === value);
+}
+
 interface ValidatedAnswer {
   questionId: string;
   value: string;
@@ -44,11 +49,7 @@ export const GET: APIRoute = async ({ cookies }) => {
   if (!user) return jsonResponse({ error: 'unauthorized' }, 401);
 
   const db = getAdminFirestore();
-  const snap = await db
-    .collection('users')
-    .doc(user.uid)
-    .collection(CRYSTAL_BALL_COLLECTION)
-    .get();
+  const snap = await db.collection('users').doc(user.uid).collection(CRYSTAL_BALL_COLLECTION).get();
   const answers: Record<string, string> = {};
   for (const doc of snap.docs) {
     const data = doc.data();
@@ -100,6 +101,11 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
     if (question.inputType === 'team') {
       if (!isValidTeamValue(rawValue)) {
         errors.push(`invalid-team:${questionId}`);
+        continue;
+      }
+    } else if (question.inputType === 'select') {
+      if (!isValidSelectValue(rawValue, question.options)) {
+        errors.push(`invalid-select:${questionId}`);
         continue;
       }
     } else {

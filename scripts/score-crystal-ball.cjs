@@ -42,7 +42,21 @@ async function loadAnswers() {
   if (!data || !Array.isArray(data.entries)) {
     throw new Error('crystalBall/answers has no entries array.');
   }
-  return data.entries;
+  const byId = new Map();
+  for (const e of data.entries) {
+    if (!e || typeof e.id !== 'string') continue;
+    if (!byId.has(e.id)) byId.set(e.id, []);
+    byId.get(e.id).push(e);
+  }
+  return byId;
+}
+
+function findEntryForValue(entries, value) {
+  if (!Array.isArray(entries) || entries.length === 0) return null;
+  if (entries.length === 1) {
+    return entries[0].ans === value ? entries[0] : null;
+  }
+  return entries.find((e) => e.ans === value) ?? null;
 }
 
 async function scoreUser(uid, entriesById) {
@@ -55,14 +69,16 @@ async function scoreUser(uid, entriesById) {
   let scored = 0;
 
   for (const doc of snap.docs) {
-    const entry = entriesById[doc.id];
-    if (!entry) continue;
-    if (entry.ans === null || entry.ans === undefined) continue;
+    const entries = entriesById.get(doc.id);
+    if (!entries || entries.length === 0) continue;
+    const hasCanonical = entries.some((e) => typeof e.ans === 'string' && e.ans !== '');
+    if (!hasCanonical) continue;
 
     const data = doc.data();
     if (typeof data.value !== 'string') continue;
 
-    const points = data.value === entry.ans ? entry.points : 0;
+    const match = findEntryForValue(entries, data.value);
+    const points = match ? match.points : 0;
     batch.set(
       doc.ref,
       {
@@ -82,14 +98,15 @@ async function scoreUser(uid, entriesById) {
 }
 
 async function main() {
-  const entries = await loadAnswers();
-  const entriesById = Object.fromEntries(entries.map((e) => [e.id, e]));
+  const entriesById = await loadAnswers();
 
-  const unanswered = entries.filter((e) => e.ans === null || e.ans === undefined);
+  const allEntries = [];
+  for (const list of entriesById.values()) allEntries.push(...list);
+  const unanswered = allEntries.filter((e) => typeof e.ans !== 'string' || e.ans === '');
   if (unanswered.length > 0) {
-    console.warn(`Warning: ${unanswered.length} entries have no official answer and will be skipped:`);
+    console.warn(`Warning: ${unanswered.length} entries have no canonical "ans" and will be skipped:`);
     for (const e of unanswered) {
-      console.warn(`  - ${e.id}`);
+      console.warn(`  - ${e.id}${e.ans !== null && e.ans !== undefined ? ` (ans=${e.ans})` : ''}`);
     }
   }
 

@@ -55,7 +55,7 @@ async function loadOfficialCrystalBallAnswers(db) {
   const entries = snap.data()?.entries;
   if (!Array.isArray(entries)) return map;
   for (const e of entries) {
-    if (e && typeof e.id === 'string' && typeof e.ans === 'string') {
+    if (e && typeof e.id === 'string' && typeof e.ans === 'string' && e.ans !== '') {
       map.set(e.id, e.ans);
     }
   }

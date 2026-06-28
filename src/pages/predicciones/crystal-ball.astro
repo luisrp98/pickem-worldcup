@@ -18,6 +18,7 @@ const targetUid = Astro.url.searchParams.get('uid');
 const isReadOnly = Boolean(targetUid) && targetUid !== currentUser.uid;
 
 const teams = Object.keys(flags).sort((a, b) => a.localeCompare(b, 'es'));
+const teamOptions = teams.map((t) => ({ value: t, label: t }));
 const [savedAnswers, settings, entries] = await Promise.all([
   loadCrystalBallAnswers(Astro.cookies, isReadOnly ? (targetUid ?? undefined) : undefined),
   loadCrystalBallSettings(),
@@ -67,7 +68,7 @@ if (isReadOnly && targetUid) {
                   question={q.question}
                   inputType={q.inputType}
                   value={savedAnswers[q.id] ?? ''}
-                  options={q.inputType === 'team' ? teams : undefined}
+                  options={q.inputType === 'team' ? teamOptions : q.options}
                   disabled
                   officialValue={entry?.officialValue ?? null}
                   points={entry?.points ?? null}
@@ -103,7 +104,7 @@ if (isReadOnly && targetUid) {
                     question={q.question}
                     inputType={q.inputType}
                     value={savedAnswers[q.id] ?? ''}
-                    options={q.inputType === 'team' ? teams : undefined}
+                    options={q.inputType === 'team' ? teamOptions : q.options}
                     disabled={isClosed}
                     officialValue={entry?.officialValue ?? null}
                     points={entry?.points ?? null}

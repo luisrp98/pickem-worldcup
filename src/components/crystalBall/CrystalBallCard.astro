@@ -1,5 +1,5 @@
 ---
-import type { CrystalBallInputType } from '../../data/crystalBallQuestions';
+import type { CrystalBallInputType, CrystalBallOption } from '../../data/crystalBallQuestions';
 import ShadowContainer from '../ShadowContainer.astro';
 
 export interface Props {
@@ -8,7 +8,7 @@ export interface Props {
   question: string;
   inputType: CrystalBallInputType;
   value?: string;
-  options?: string[];
+  options?: CrystalBallOption[];
   placeholder?: string;
   disabled?: boolean;
   name?: string;
@@ -79,14 +79,25 @@ if (isScored && points > 0) {
   </header>
   <div class="flex-1">
     {
-      inputType === 'team' ? (
+      inputType === 'select' ? (
+        <select id={inputId} name={fieldName} disabled={disabled} aria-label={question} class={inputClass}>
+          <option value="" disabled selected={value === ''}>
+            Seleccioná una opción
+          </option>
+          {options.map((opt) => (
+            <option value={opt.value} selected={opt.value === value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      ) : inputType === 'team' ? (
         <select id={inputId} name={fieldName} disabled={disabled} aria-label={question} class={inputClass}>
           <option value="" disabled selected={value === ''}>
             Seleccioná un equipo
           </option>
           {options.map((opt) => (
-            <option value={opt} selected={opt === value}>
-              {opt}
+            <option value={opt.value} selected={opt.value === value}>
+              {opt.label}
             </option>
           ))}
         </select>

@@ -1,29 +1,120 @@
 [
   {
-    "id": "champion",
+    "id": "world-champion",
     "emoji": "🏆",
-    "question": "¿Quién va a ser el campeón?",
+    "question": "¿Qué selección será la campeona del Mundial?",
+    "inputType": "team",
+    "points": 20,
+    "bgClass": "bg-group-a-secondary border border-group-a-primary",
+    "circleBgClass": "bg-group-a-primary"
+  },
+  {
+    "id": "runner-up",
+    "emoji": "🥈",
+    "question": "¿Qué selección será la subcampeona?",
+    "inputType": "team",
+    "points": 15,
+    "bgClass": "bg-group-b-secondary border border-group-b-primary",
+    "circleBgClass": "bg-group-b-primary"
+  },
+  {
+    "id": "golden-ball",
+    "emoji": "🎖️",
+    "question": "¿Qué jugador ganará el Balón de Oro del torneo?",
+    "inputType": "player",
+    "points": 15,
+    "bgClass": "bg-group-c-secondary border border-group-c-primary",
+    "circleBgClass": "bg-group-c-primary"
+  },
+  {
+    "id": "golden-boot",
+    "emoji": "👟",
+    "question": "¿Quién será el máximo goleador del torneo (Bota de Oro)?",
+    "inputType": "player",
+    "points": 15,
+    "bgClass": "bg-group-d-secondary border border-group-d-primary",
+    "circleBgClass": "bg-group-d-primary"
+  },
+  {
+    "id": "playmaker",
+    "emoji": "🎯",
+    "question": "¿Quién será el máximo asistidor del torneo?",
+    "inputType": "player",
+    "points": 12,
+    "bgClass": "bg-group-e-secondary border border-group-e-primary",
+    "circleBgClass": "bg-group-e-primary"
+  },
+  {
+    "id": "golden-glove",
+    "emoji": "🧤",
+    "question": "¿Qué portero ganará el Guante de Oro?",
+    "inputType": "player",
+    "points": 12,
+    "bgClass": "bg-group-f-secondary border border-group-f-primary",
+    "circleBgClass": "bg-group-f-primary"
+  },
+  {
+    "id": "best-young-player",
+    "emoji": "🌱",
+    "question": "¿Qué jugador ganará el premio al Mejor Jugador Joven?",
+    "inputType": "player",
+    "points": 12,
+    "bgClass": "bg-group-g-secondary border border-group-g-primary",
+    "circleBgClass": "bg-group-g-primary"
+  },
+  {
+    "id": "most-goals",
+    "emoji": "⚔️",
+    "question": "¿Qué selección marcará la mayor cantidad de goles durante el torneo?",
     "inputType": "team",
     "points": 10,
-    "bgClass": "bg-arceus-accent-300 border border-arceus-accent-200",
-    "circleBgClass": "bg-arceus-accent-100"
+    "bgClass": "bg-group-h-secondary border border-group-h-primary",
+    "circleBgClass": "bg-group-h-primary"
   },
   {
-    "id": "top-scorer",
-    "emoji": "⚽",
-    "question": "¿Quién va a ser el máximo goleador?",
-    "inputType": "player",
-    "points": 7,
-    "bgClass": "bg-arceus-accent-100 border border-arceus-accent-200",
-    "circleBgClass": "bg-arceus-accent-50"
+    "id": "fewest-goals",
+    "emoji": "🛡️",
+    "question": "¿Qué selección recibirá la menor cantidad de goles durante el torneo?",
+    "inputType": "team",
+    "points": 10,
+    "bgClass": "bg-group-i-secondary border border-group-i-primary",
+    "circleBgClass": "bg-group-i-primary"
   },
   {
-    "id": "best-player",
-    "emoji": "🌟",
-    "question": "¿Quién va a ser el mejor jugador?",
-    "inputType": "player",
+    "id": "mexico-round",
+    "emoji": "🇲🇽",
+    "question": "¿Hasta qué ronda llegará México?",
+    "inputType": "select",
+    "bgClass": "bg-group-j-secondary border border-group-j-primary",
+    "circleBgClass": "bg-group-j-primary",
+    "options": [
+      { "value": "dieciseisavos", "label": "Eliminados en dieciseisavos (1 punto)" },
+      { "value": "octavos", "label": "Llega a octavos (3 puntos)" },
+      { "value": "cuartos", "label": "Llega a cuartos (6 puntos)" },
+      { "value": "semifinales", "label": "Llega a semifinales (10 puntos)" },
+      { "value": "final", "label": "Llega a la final (15 puntos)" },
+      { "value": "campeon", "label": "Campeón (20 puntos)" }
+    ],
+    "pointsByValue": {
+      "dieciseisavos": 1,
+      "octavos": 3,
+      "cuartos": 6,
+      "semifinales": 10,
+      "final": 15,
+      "campeon": 20
+    }
+  },
+  {
+    "id": "ochoa-plays",
+    "emoji": "🧤",
+    "question": "¿Ochoa juega al menos un minuto?",
+    "inputType": "select",
     "points": 5,
-    "bgClass": "bg-arceus-accent-300 border border-arceus-accent-200",
-    "circleBgClass": "bg-arceus-accent-100"
+    "bgClass": "bg-group-k-secondary border border-group-k-primary",
+    "circleBgClass": "bg-group-k-primary",
+    "options": [
+      { "value": "si", "label": "Sí" },
+      { "value": "no", "label": "No" }
+    ]
   }
 ]

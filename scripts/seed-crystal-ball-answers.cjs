@@ -20,19 +20,59 @@ const db = getFirestore();
 
 const CRYSTAL_BALL_CONFIG = require('../src/data/crystalBallQuestions.json');
 
+function isTiered(q) {
+  return q.pointsByValue && typeof q.pointsByValue === 'object';
+}
+
+function buildTemplate(config) {
+  const out = [];
+  for (const q of config) {
+    if (isTiered(q)) {
+      for (const [value, points] of Object.entries(q.pointsByValue)) {
+        out.push({ id: q.id, ans: value, points });
+      }
+    } else {
+      out.push({ id: q.id, ans: null, points: q.points });
+    }
+  }
+  return out;
+}
+
+function buildExistingIndex(existingEntries) {
+  const byId = new Map();
+  for (const e of existingEntries) {
+    if (!e || typeof e.id !== 'string') continue;
+    if (!byId.has(e.id)) byId.set(e.id, e);
+  }
+  const byIdAns = new Map();
+  for (const e of existingEntries) {
+    if (!e || typeof e.id !== 'string' || typeof e.ans !== 'string') continue;
+    byIdAns.set(`${e.id}::${e.ans}`, e);
+  }
+  return { byId, byIdAns };
+}
+
 async function main() {
   const ref = db.collection('crystalBall').doc('answers');
   const existing = await ref.get();
   const existingEntries = Array.isArray(existing.data()?.entries) ? existing.data().entries : [];
-  const existingById = new Map(existingEntries.map((e) => [e.id, e]));
+  const { byId, byIdAns } = buildExistingIndex(existingEntries);
 
-  const merged = CRYSTAL_BALL_CONFIG.map((q) => {
-    const prev = existingById.get(q.id);
-    return {
-      id: q.id,
-      ans: prev && prev.ans !== undefined ? prev.ans : null,
-      points: q.points,
-    };
+  const template = buildTemplate(CRYSTAL_BALL_CONFIG);
+
+  const merged = template.map((entry) => {
+    if (entry.ans === null) {
+      const prev = byId.get(entry.id);
+      if (prev && typeof prev.ans === 'string') {
+        return { id: entry.id, ans: prev.ans, points: entry.points };
+      }
+      return { id: entry.id, ans: null, points: entry.points };
+    }
+    const prev = byIdAns.get(`${entry.id}::${entry.ans}`);
+    if (prev && typeof prev.ans === 'string') {
+      return { id: entry.id, ans: prev.ans, points: entry.points };
+    }
+    return entry;
   });
 
   const existingData = existing.data() ?? {};
@@ -47,7 +87,7 @@ async function main() {
 
   console.log(`Seeded ${merged.length} entries in crystalBall/answers.`);
   for (const entry of merged) {
-    console.log(`  - ${entry.id}: points=${entry.points}, ans=${entry.ans === null ? '(not set)' : entry.ans}`);
+    console.log(`  - ${entry.id} | ans=${entry.ans === null ? '(not set)' : entry.ans} | points=${entry.points}`);
   }
   console.log('Existing "ans" values were preserved (merge mode).');
 }
