@@ -1,6 +1,7 @@
 import type { LeaderboardEntry } from '../../data/leaderboard';
 import { getAdminAuth, getAdminFirestore } from '../firebase/admin';
 import { displayNameFromUser } from '../displayName';
+import { isGroupRound } from '../matches';
 
 interface UserAggregate {
   uid: string;
@@ -19,12 +20,6 @@ interface UserAggregate {
   previousPosition: number | null;
   groupPreviousPosition: number | null;
   knockoutPreviousPosition: number | null;
-}
-
-function isGroupRound(group: unknown, round: unknown): boolean {
-  if (typeof group === 'string' && group.length > 0) return true;
-  if (typeof round === 'string' && round.toLowerCase().startsWith('group')) return true;
-  return false;
 }
 
 function readPosition(value: unknown): number | null {

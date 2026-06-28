@@ -105,6 +105,12 @@ export function groupByDate(matches: Match[]): Map<string, Match[]> {
   return map;
 }
 
+export function isGroupRound(group: unknown, round: unknown): boolean {
+  if (typeof group === 'string' && group.length > 0) return true;
+  if (typeof round === 'string' && round.toLowerCase().startsWith('group')) return true;
+  return false;
+}
+
 export const flags: Record<string, string> = {
   Mexico: '🇲🇽',
   'South Africa': '🇿🇦',
