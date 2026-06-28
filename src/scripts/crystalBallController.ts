@@ -124,7 +124,10 @@ export function mountCrystalBallController(): void {
       showStatus('Predicciones guardadas', 'success');
     } catch (err) {
       console.error('crystal ball submit failed', err);
-      showStatus('Error al guardar', 'error');
+      const message = err instanceof Error && err.message === 'crystal-ball-closed'
+        ? 'Las predicciones están cerradas'
+        : 'Error al guardar';
+      showStatus(message, 'error');
     } finally {
       setSubmitting(false);
       refreshSubmitState();

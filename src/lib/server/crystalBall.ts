@@ -4,6 +4,10 @@ import { verifySession } from '../firebase/session';
 
 export type CrystalBallAnswersMap = Record<string, string>;
 
+export interface CrystalBallSettings {
+  editable: boolean;
+}
+
 export async function loadCrystalBallAnswers(
   cookies: AstroCookies,
   targetUid?: string,
@@ -21,4 +25,17 @@ export async function loadCrystalBallAnswers(
     }
   }
   return out;
+}
+
+export async function loadCrystalBallSettings(): Promise<CrystalBallSettings> {
+  const db = getAdminFirestore();
+  try {
+    const snap = await db.collection('crystalBall').doc('settings').get();
+    if (!snap.exists) return { editable: true };
+    const data = snap.data();
+    return { editable: data?.editable !== false };
+  } catch (err) {
+    console.error('loadCrystalBallSettings failed', err);
+    return { editable: true };
+  }
 }

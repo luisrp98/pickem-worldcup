@@ -63,6 +63,15 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
   const user = await verifySession(cookies);
   if (!user) return jsonResponse({ error: 'unauthorized' }, 401);
 
+  const db = getAdminFirestore();
+  const settingsSnap = await db.collection('crystalBall').doc('settings').get();
+  if (settingsSnap.exists) {
+    const settingsData = settingsSnap.data();
+    if (settingsData?.editable === false) {
+      return jsonResponse({ error: 'crystal-ball-closed' }, 409);
+    }
+  }
+
   let body: RequestBody;
   try {
     body = (await request.json()) as RequestBody;
@@ -110,7 +119,6 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
     return jsonResponse({ error: 'no-answers' }, 400);
   }
 
-  const db = getAdminFirestore();
   const userRef = db.collection('users').doc(user.uid);
   const existing = await userRef.collection(CRYSTAL_BALL_COLLECTION).get();
   const existingIds = new Set(existing.docs.map((d) => d.id));

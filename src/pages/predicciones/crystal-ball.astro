@@ -5,7 +5,7 @@ import PredictionsTabs from '../../components/predictions/PredictionsTabs.astro'
 import CrystalBallCard from '../../components/crystalBall/CrystalBallCard.astro';
 import { crystalBallQuestions } from '../../data/crystalBallQuestions';
 import { flags } from '../../lib/matches';
-import { loadCrystalBallAnswers } from '../../lib/server/crystalBall';
+import { loadCrystalBallAnswers, loadCrystalBallSettings } from '../../lib/server/crystalBall';
 import { resolveDisplayName } from '../../lib/displayName';
 
 const currentUser = Astro.locals.user;
@@ -20,10 +20,11 @@ const targetUid = Astro.url.searchParams.get('uid');
 const isReadOnly = Boolean(targetUid) && targetUid !== currentUser.uid;
 
 const teams = Object.keys(flags).sort((a, b) => a.localeCompare(b, 'es'));
-const savedAnswers = await loadCrystalBallAnswers(
-  Astro.cookies,
-  isReadOnly ? targetUid ?? undefined : undefined,
-);
+const [savedAnswers, settings] = await Promise.all([
+  loadCrystalBallAnswers(Astro.cookies, isReadOnly ? targetUid ?? undefined : undefined),
+  loadCrystalBallSettings(),
+]);
+const isClosed = !settings.editable;
 
 let pageTitle = 'Crystal Ball — PICKEM';
 let pageHeading = 'Crystal Ball';
@@ -79,45 +80,55 @@ if (isReadOnly && targetUid) {
           </div>
         </div>
       ) : (
-        <form
-          class="mt-6 flex flex-col gap-4"
-          data-crystal-ball-form
-          data-cb-teams={JSON.stringify(teams)}
-          novalidate
-        >
-          <script
-            type="application/json"
-            data-cb-config
-            set:html={JSON.stringify(crystalBallQuestions)}
-          />
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {crystalBallQuestions.map((q) => (
-              <CrystalBallCard
-                id={q.id}
-                emoji={q.emoji}
-                question={q.question}
-                inputType={q.inputType}
-                value={savedAnswers[q.id] ?? ''}
-                options={q.inputType === 'team' ? teams : undefined}
-              />
-            ))}
-          </div>
-          <div class="flex items-center justify-end gap-3">
-            <span
-              class="text-xs text-text-tertiary hidden"
-              data-cb-save-status
-              aria-live="polite"
+        <>
+          {isClosed && (
+            <div class="mt-6 rounded-sm border border-border bg-arceus-accent-100 px-4 py-3 text-sm text-text-secondary">
+              Las predicciones de Crystal Ball están cerradas. Podés ver tus respuestas pero no editarlas.
+            </div>
+          )}
+          <form
+            class="mt-6 flex flex-col gap-4"
+            data-crystal-ball-form
+            data-cb-teams={JSON.stringify(teams)}
+            novalidate
+          >
+            <script
+              type="application/json"
+              data-cb-config
+              set:html={JSON.stringify(crystalBallQuestions)}
             />
-            <button
-              type="submit"
-              disabled
-              class="text-xs font-semibold tracking-wider uppercase px-4 py-2 rounded-sm bg-arceus-secondary-950 text-arceus-primary-50 hover:bg-arceus-secondary-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-arceus-secondary-950"
-            >
-              Guardar predicciones
-            </button>
-          </div>
-        </form>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {crystalBallQuestions.map((q) => (
+                <CrystalBallCard
+                  id={q.id}
+                  emoji={q.emoji}
+                  question={q.question}
+                  inputType={q.inputType}
+                  value={savedAnswers[q.id] ?? ''}
+                  options={q.inputType === 'team' ? teams : undefined}
+                  disabled={isClosed}
+                />
+              ))}
+            </div>
+            {!isClosed && (
+              <div class="flex items-center justify-end gap-3">
+                <span
+                  class="text-xs text-text-tertiary hidden"
+                  data-cb-save-status
+                  aria-live="polite"
+                />
+                <button
+                  type="submit"
+                  disabled
+                  class="text-xs font-semibold tracking-wider uppercase px-4 py-2 rounded-sm bg-arceus-secondary-950 text-arceus-primary-50 hover:bg-arceus-secondary-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-arceus-secondary-950"
+                >
+                  Guardar predicciones
+                </button>
+              </div>
+            )}
+          </form>
+        </>
       )
     }
   </div>
