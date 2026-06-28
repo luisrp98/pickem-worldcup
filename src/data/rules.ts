@@ -31,6 +31,7 @@ export const knockoutRounds: PointsTableData = {
     { text: 'Octavos de final', value: '8' },
     { text: 'Cuartos de final', value: '12' },
     { text: 'Semifinales', value: '18' },
+    { text: 'Tercer puesto', value: '20' },
     { text: 'Final', value: '25' },
   ],
 };

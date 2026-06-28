@@ -11,6 +11,8 @@ export interface MatchPoints {
 
 export interface ScorableMatch {
   score?: { ft?: [number, number] | null } | null;
+  group?: string | null;
+  round?: string;
 }
 
 export interface StoredPrediction extends Prediction {
@@ -29,7 +31,25 @@ export interface StoredPrediction extends Prediction {
   scoringVersion: number;
 }
 
-export const SCORING_VERSION = 1;
+export const SCORING_VERSION = 2;
+
+const GROUP_RESULT_POINTS = 2;
+const EXACT_SCORE_BONUS = 5;
+
+const KNOCKOUT_POINTS: Record<string, number> = {
+  'Round of 32': 5,
+  'Round of 16': 8,
+  'Quarter-final': 12,
+  'Semi-final': 18,
+  'Match for third place': 20,
+  Final: 25,
+};
+
+function isGroupRound(group: unknown, round: unknown): boolean {
+  if (typeof group === 'string' && group.length > 0) return true;
+  if (typeof round === 'string' && round.toLowerCase().startsWith('group')) return true;
+  return false;
+}
 
 export function calculateMatchPoints(
   match: ScorableMatch,
@@ -48,6 +68,11 @@ export function calculateMatchPoints(
 
   const resultado = result === predResult;
   const marcador = prediction.score1 === real1 && prediction.score2 === real2;
-  const points = (resultado ? 2 : 0) + (marcador ? 5 : 0);
+
+  const base = isGroupRound(match.group, match.round)
+    ? GROUP_RESULT_POINTS
+    : ((typeof match.round === 'string' ? KNOCKOUT_POINTS[match.round] : undefined) ?? 0);
+
+  const points = (resultado ? base : 0) + (marcador ? EXACT_SCORE_BONUS : 0);
   return { points, resultado, marcador };
 }
