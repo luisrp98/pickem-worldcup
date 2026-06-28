@@ -6,30 +6,57 @@ import CrystalBallCard from '../../components/crystalBall/CrystalBallCard.astro'
 import { crystalBallQuestions } from '../../data/crystalBallQuestions';
 import { flags } from '../../lib/matches';
 import { loadCrystalBallAnswers } from '../../lib/server/crystalBall';
+import { resolveDisplayName } from '../../lib/displayName';
 
 const currentUser = Astro.locals.user;
 
 if (!currentUser) {
-  return Astro.redirect('/login?from=' + encodeURIComponent('/predicciones/crystal-ball'));
+  return Astro.redirect(
+    '/login?from=' + encodeURIComponent(Astro.url.pathname + Astro.url.search),
+  );
 }
 
+const targetUid = Astro.url.searchParams.get('uid');
+const isReadOnly = Boolean(targetUid) && targetUid !== currentUser.uid;
+
 const teams = Object.keys(flags).sort((a, b) => a.localeCompare(b, 'es'));
-const savedAnswers = await loadCrystalBallAnswers(Astro.cookies);
+const savedAnswers = await loadCrystalBallAnswers(
+  Astro.cookies,
+  isReadOnly ? targetUid ?? undefined : undefined,
+);
+
+let pageTitle = 'Crystal Ball — PICKEM';
+let pageHeading = 'Crystal Ball';
+let pageHighlight = 'Crystal Ball';
+let pageEyebrow = 'Predicciones especiales';
+let showDescription = true;
+
+if (isReadOnly && targetUid) {
+  const name = await resolveDisplayName(targetUid);
+  pageTitle = `Crystal Ball de ${name} — PICKEM`;
+  pageHeading = `Crystal Ball de ${name}`;
+  pageHighlight = 'Crystal Ball de';
+  showDescription = false;
+}
 ---
 
 <Layout
-  title="Crystal Ball — PICKEM"
+  title={pageTitle}
   description="Predicciones especiales del mundial: campeón, máximo goleador y mejor jugador."
 >
   <div class="max-w-300 mx-auto px-6 md:px-8 py-8 md:py-12">
     <PageHeader
-      eyebrow="Predicciones especiales"
-      title="Crystal Ball"
-      highlight="Crystal Ball"
+      eyebrow={pageEyebrow}
+      title={pageHeading}
+      highlight={pageHighlight}
     >
-      <Fragment slot="description">
-        Pronostica los grandes premios del mundial. <span aria-hidden="true">🔮</span>
-      </Fragment>
+      {
+        showDescription && (
+          <Fragment slot="description">
+            Pronostica los grandes premios del mundial. <span aria-hidden="true">🔮</span>
+          </Fragment>
+        )
+      }
     </PageHeader>
 
     <PredictionsTabs current="crystal-ball" />
