@@ -7,10 +7,13 @@ export interface Props {
 
 const { current } = Astro.props;
 
+const currentUid = Astro.url.searchParams.get('uid');
+const uidSuffix = currentUid ? `?uid=${currentUid}` : '';
+
 const tabs: Array<{ id: PredictionsSection; label: string; href: string }> = [
-  { id: 'groups', label: 'Groups', href: '/predicciones' },
-  { id: 'knockouts', label: 'Knockouts', href: '/predicciones/knockouts' },
-  { id: 'crystal-ball', label: 'Crystal Ball', href: '/predicciones/crystal-ball' },
+  { id: 'groups', label: 'Groups', href: `/predicciones${uidSuffix}` },
+  { id: 'knockouts', label: 'Knockouts', href: `/predicciones/knockouts${uidSuffix}` },
+  { id: 'crystal-ball', label: 'Crystal Ball', href: `/predicciones/crystal-ball${uidSuffix}` },
 ];
 ---
 
