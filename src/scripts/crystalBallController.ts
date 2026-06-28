@@ -28,12 +28,19 @@ export function createCrystalBallStore(
   return { state, refresh, isComplete };
 }
 
-const SIMULATED_LATENCY_MS = 400;
+const CRYSTAL_BALL_API = '/api/crystal-ball';
 
 export async function submitCrystalBallAnswers(state: CrystalBallAnswers): Promise<void> {
-  await new Promise((r) => setTimeout(r, SIMULATED_LATENCY_MS));
-  const timestamp = new Date().toISOString();
-  console.log('Crystal Ball submit:', { timestamp, payload: state });
+  const res = await fetch(CRYSTAL_BALL_API, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ answers: state }),
+  });
+  if (!res.ok) {
+    const data = (await res.json().catch(() => ({}))) as { error?: string; details?: unknown };
+    const message = data.error ? `${data.error}` : `HTTP ${res.status}`;
+    throw new Error(message);
+  }
 }
 
 function readConfig(): CrystalBallQuestion[] | null {
@@ -114,7 +121,7 @@ export function mountCrystalBallController(): void {
     setSubmitting(true);
     try {
       await submitCrystalBallAnswers({ ...store.state });
-      showStatus('Cambios guardados — próximamente', 'success');
+      showStatus('Predicciones guardadas', 'success');
     } catch (err) {
       console.error('crystal ball submit failed', err);
       showStatus('Error al guardar', 'error');

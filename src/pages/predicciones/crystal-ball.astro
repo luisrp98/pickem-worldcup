@@ -5,6 +5,7 @@ import PredictionsTabs from '../../components/predictions/PredictionsTabs.astro'
 import CrystalBallCard from '../../components/crystalBall/CrystalBallCard.astro';
 import { crystalBallQuestions } from '../../data/crystalBallQuestions';
 import { flags } from '../../lib/matches';
+import { loadCrystalBallAnswers } from '../../lib/server/crystalBall';
 
 const currentUser = Astro.locals.user;
 
@@ -13,6 +14,7 @@ if (!currentUser) {
 }
 
 const teams = Object.keys(flags).sort((a, b) => a.localeCompare(b, 'es'));
+const savedAnswers = await loadCrystalBallAnswers(Astro.cookies);
 ---
 
 <Layout
@@ -52,7 +54,7 @@ const teams = Object.keys(flags).sort((a, b) => a.localeCompare(b, 'es'));
               emoji={q.emoji}
               question={q.question}
               inputType={q.inputType}
-              value=""
+              value={savedAnswers[q.id] ?? ''}
               options={q.inputType === 'team' ? teams : undefined}
             />
           ))
