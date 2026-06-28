@@ -8,6 +8,8 @@ export interface CrystalBallQuestion {
   question: string;
   inputType: CrystalBallInputType;
   points: number;
+  bgClass?: string;
+  circleBgClass?: string;
 }
 
 export const crystalBallQuestions: CrystalBallQuestion[] = data as CrystalBallQuestion[];

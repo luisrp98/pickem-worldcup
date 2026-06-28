@@ -1,5 +1,6 @@
 ---
 import type { CrystalBallInputType } from '../../data/crystalBallQuestions';
+import ShadowContainer from '../ShadowContainer.astro';
 
 export interface Props {
   id: string;
@@ -11,6 +12,10 @@ export interface Props {
   placeholder?: string;
   disabled?: boolean;
   name?: string;
+  officialValue?: string | null;
+  points?: number | null;
+  bgClass?: string;
+  circleBgClass?: string;
 }
 
 const {
@@ -23,6 +28,10 @@ const {
   placeholder,
   disabled = false,
   name,
+  officialValue = null,
+  points = null,
+  bgClass = 'bg-arceus-accent-300 border border-arceus-accent-200',
+  circleBgClass = 'bg-arceus-accent-100',
 } = Astro.props;
 
 const fieldName = name ?? `cb-${id}`;
@@ -30,12 +39,36 @@ const inputId = `cb-input-${id}`;
 
 const inputClass =
   'w-full px-3 py-2 text-base border border-border rounded-sm bg-white text-text outline-none focus:border-text focus:bg-surface transition-[border-color,background] placeholder:text-text-tertiary disabled:bg-muted disabled:opacity-60 disabled:cursor-not-allowed';
+
+const isScored = points !== null;
+
+let badgeClass = '';
+let badgeText = '';
+let statusText = '';
+let statusClass = '';
+
+if (isScored && points > 0) {
+  badgeClass = 'bg-green-500 text-white';
+  badgeText = `+${points}`;
+  statusText = 'Acertaste';
+  statusClass = 'text-green-700';
+} else if (isScored && points === 0) {
+  badgeClass = 'bg-red-500 text-white';
+  badgeText = '0';
+  statusText = 'Fallaste';
+  statusClass = 'text-red-700';
+} else {
+  badgeClass = 'bg-arceus-accent-300 text-text';
+  badgeText = '—';
+  statusText = 'Pendiente de puntos';
+  statusClass = 'text-text-secondary';
+}
 ---
 
-<article class="bg-surface border border-border rounded-md p-6 hover:border-border-strong transition-colors flex flex-col">
+<ShadowContainer bgClass={bgClass} class="p-6 flex flex-col">
   <header class="flex flex-col items-center text-center gap-2.5 mb-4">
     <span
-      class="w-14 h-14 rounded-full bg-arceus-accent-400 text-2xl flex items-center justify-center"
+      class:list={['w-14 h-14 rounded-full text-2xl flex items-center justify-center', circleBgClass]}
       aria-hidden="true"
     >
       {emoji}
@@ -47,13 +80,7 @@ const inputClass =
   <div class="flex-1">
     {
       inputType === 'team' ? (
-        <select
-          id={inputId}
-          name={fieldName}
-          disabled={disabled}
-          aria-label={question}
-          class={inputClass}
-        >
+        <select id={inputId} name={fieldName} disabled={disabled} aria-label={question} class={inputClass}>
           <option value="" disabled selected={value === ''}>
             Seleccioná un equipo
           </option>
@@ -77,4 +104,14 @@ const inputClass =
       )
     }
   </div>
-</article>
+  <div class="mt-4 flex items-center justify-end gap-2 shrink-0">
+    <span
+      class:list={['text-xs font-semibold tracking-wider uppercase px-2 py-1 rounded-sm whitespace-nowrap', badgeClass]}
+    >
+      {badgeText}
+    </span>
+    <span class:list={['text-xs font-semibold whitespace-nowrap', statusClass]}>
+      {statusText}
+    </span>
+  </div>
+</ShadowContainer>

@@ -5,24 +5,23 @@ import PredictionsTabs from '../../components/predictions/PredictionsTabs.astro'
 import CrystalBallCard from '../../components/crystalBall/CrystalBallCard.astro';
 import { crystalBallQuestions } from '../../data/crystalBallQuestions';
 import { flags } from '../../lib/matches';
-import { loadCrystalBallAnswers, loadCrystalBallSettings } from '../../lib/server/crystalBall';
+import { loadCrystalBallAnswers, loadCrystalBallEntries, loadCrystalBallSettings } from '../../lib/server/crystalBall';
 import { resolveDisplayName } from '../../lib/displayName';
 
 const currentUser = Astro.locals.user;
 
 if (!currentUser) {
-  return Astro.redirect(
-    '/login?from=' + encodeURIComponent(Astro.url.pathname + Astro.url.search),
-  );
+  return Astro.redirect('/login?from=' + encodeURIComponent(Astro.url.pathname + Astro.url.search));
 }
 
 const targetUid = Astro.url.searchParams.get('uid');
 const isReadOnly = Boolean(targetUid) && targetUid !== currentUser.uid;
 
 const teams = Object.keys(flags).sort((a, b) => a.localeCompare(b, 'es'));
-const [savedAnswers, settings] = await Promise.all([
-  loadCrystalBallAnswers(Astro.cookies, isReadOnly ? targetUid ?? undefined : undefined),
+const [savedAnswers, settings, entries] = await Promise.all([
+  loadCrystalBallAnswers(Astro.cookies, isReadOnly ? (targetUid ?? undefined) : undefined),
   loadCrystalBallSettings(),
+  loadCrystalBallEntries(Astro.cookies, isReadOnly ? (targetUid ?? undefined) : undefined),
 ]);
 const isClosed = !settings.editable;
 
@@ -41,16 +40,9 @@ if (isReadOnly && targetUid) {
 }
 ---
 
-<Layout
-  title={pageTitle}
-  description="Predicciones especiales del mundial: campeón, máximo goleador y mejor jugador."
->
+<Layout title={pageTitle} description="Predicciones especiales del mundial: campeón, máximo goleador y mejor jugador.">
   <div class="max-w-300 mx-auto px-6 md:px-8 py-8 md:py-12">
-    <PageHeader
-      eyebrow={pageEyebrow}
-      title={pageHeading}
-      highlight={pageHighlight}
-    >
+    <PageHeader eyebrow={pageEyebrow} title={pageHeading} highlight={pageHighlight}>
       {
         showDescription && (
           <Fragment slot="description">
@@ -66,17 +58,24 @@ if (isReadOnly && targetUid) {
       isReadOnly ? (
         <div class="mt-6 flex flex-col gap-4" data-crystal-ball-readonly>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {crystalBallQuestions.map((q) => (
-              <CrystalBallCard
-                id={q.id}
-                emoji={q.emoji}
-                question={q.question}
-                inputType={q.inputType}
-                value={savedAnswers[q.id] ?? ''}
-                options={q.inputType === 'team' ? teams : undefined}
-                disabled
-              />
-            ))}
+            {crystalBallQuestions.map((q) => {
+              const entry = entries.find((e) => e.questionId === q.id);
+              return (
+                <CrystalBallCard
+                  id={q.id}
+                  emoji={q.emoji}
+                  question={q.question}
+                  inputType={q.inputType}
+                  value={savedAnswers[q.id] ?? ''}
+                  options={q.inputType === 'team' ? teams : undefined}
+                  disabled
+                  officialValue={entry?.officialValue ?? null}
+                  points={entry?.points ?? null}
+                  bgClass={q.bgClass}
+                  circleBgClass={q.circleBgClass}
+                />
+              );
+            })}
           </div>
         </div>
       ) : (
@@ -92,32 +91,31 @@ if (isReadOnly && targetUid) {
             data-cb-teams={JSON.stringify(teams)}
             novalidate
           >
-            <script
-              type="application/json"
-              data-cb-config
-              set:html={JSON.stringify(crystalBallQuestions)}
-            />
+            <script type="application/json" data-cb-config set:html={JSON.stringify(crystalBallQuestions)} />
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {crystalBallQuestions.map((q) => (
-                <CrystalBallCard
-                  id={q.id}
-                  emoji={q.emoji}
-                  question={q.question}
-                  inputType={q.inputType}
-                  value={savedAnswers[q.id] ?? ''}
-                  options={q.inputType === 'team' ? teams : undefined}
-                  disabled={isClosed}
-                />
-              ))}
+              {crystalBallQuestions.map((q) => {
+                const entry = entries.find((e) => e.questionId === q.id);
+                return (
+                  <CrystalBallCard
+                    id={q.id}
+                    emoji={q.emoji}
+                    question={q.question}
+                    inputType={q.inputType}
+                    value={savedAnswers[q.id] ?? ''}
+                    options={q.inputType === 'team' ? teams : undefined}
+                    disabled={isClosed}
+                    officialValue={entry?.officialValue ?? null}
+                    points={entry?.points ?? null}
+                    bgClass={q.bgClass}
+                    circleBgClass={q.circleBgClass}
+                  />
+                );
+              })}
             </div>
             {!isClosed && (
               <div class="flex items-center justify-end gap-3">
-                <span
-                  class="text-xs text-text-tertiary hidden"
-                  data-cb-save-status
-                  aria-live="polite"
-                />
+                <span class="text-xs text-text-tertiary hidden" data-cb-save-status aria-live="polite" />
                 <button
                   type="submit"
                   disabled
@@ -137,8 +135,7 @@ if (isReadOnly && targetUid) {
 {
   !isReadOnly && (
     <script>
-      import { mountCrystalBallController } from '../../scripts/crystalBallController';
-      mountCrystalBallController();
+      import {mountCrystalBallController} from '../../scripts/crystalBallController'; mountCrystalBallController();
     </script>
   )
 }

@@ -4,20 +4,26 @@
     "emoji": "🏆",
     "question": "¿Quién va a ser el campeón?",
     "inputType": "team",
-    "points": 10
+    "points": 10,
+    "bgClass": "bg-arceus-accent-300 border border-arceus-accent-200",
+    "circleBgClass": "bg-arceus-accent-100"
   },
   {
     "id": "top-scorer",
     "emoji": "⚽",
     "question": "¿Quién va a ser el máximo goleador?",
     "inputType": "player",
-    "points": 7
+    "points": 7,
+    "bgClass": "bg-arceus-accent-100 border border-arceus-accent-200",
+    "circleBgClass": "bg-arceus-accent-50"
   },
   {
     "id": "best-player",
     "emoji": "🌟",
     "question": "¿Quién va a ser el mejor jugador?",
     "inputType": "player",
-    "points": 5
+    "points": 5,
+    "bgClass": "bg-arceus-accent-300 border border-arceus-accent-200",
+    "circleBgClass": "bg-arceus-accent-100"
   }
 ]
