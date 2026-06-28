@@ -95,6 +95,13 @@ const nameLinkClass = isSelf
   : 'font-semibold text-text hover:underline hover:text-text-hover-primary transition-colors';
 
 const isCb = phase === 'crystal-ball';
+
+const predictionsHref = {
+  total: `/predicciones?uid=${entry.uid}`,
+  groups: `/predicciones?uid=${entry.uid}`,
+  knockouts: `/predicciones/knockouts?uid=${entry.uid}`,
+  'crystal-ball': `/predicciones/crystal-ball?uid=${entry.uid}`,
+}[phase];
 ---
 
 <tr class:list={[podiumBg, podiumBorder]} data-self={isSelf ? 'true' : undefined}>
@@ -112,7 +119,7 @@ const isCb = phase === 'crystal-ball';
     <Avatar initials={initials} />
   </td>
   <td class={tdBase}>
-    <a href={`/predicciones?uid=${entry.uid}`} class={nameLinkClass}>
+    <a href={predictionsHref} class={nameLinkClass}>
       {entry.displayName}
     </a>
   </td>
