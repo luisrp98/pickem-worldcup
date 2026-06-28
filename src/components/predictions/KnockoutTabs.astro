@@ -1,0 +1,54 @@
+---
+import { knockoutRounds, knockoutUnderline } from '../../data/knockoutRounds';
+
+export interface Props {
+  current: string;
+  availableRounds: string[];
+  uid?: string | null;
+}
+
+const { current, availableRounds, uid } = Astro.props;
+
+const tabs = knockoutRounds
+  .filter((r) => availableRounds.includes(r.id))
+  .map((r) => ({
+    id: r.id,
+    label: r.label,
+    group: r.group,
+    href: `/predicciones/knockouts?round=${r.id}${uid ? `&uid=${uid}` : ''}`,
+  }));
+---
+
+<nav
+  class="flex items-center gap-1 sm:gap-2 border-b border-border overflow-x-auto"
+  aria-label="Rondas de eliminatorias"
+>
+  {
+    tabs.map((tab) => {
+      const isActive = tab.id === current;
+      return (
+        <a
+          href={tab.href}
+          aria-current={isActive ? 'page' : undefined}
+          class:list={[
+            'px-3 sm:px-4 py-2.5 text-xs sm:text-sm font-semibold tracking-widest uppercase transition-colors relative whitespace-nowrap',
+            isActive
+              ? 'text-text-primary'
+              : 'text-text-secondary hover:text-text-hover-primary',
+          ]}
+        >
+          {tab.label}
+          {isActive && (
+            <span
+              class:list={[
+                'absolute left-3 right-3 sm:left-4 sm:right-4 -bottom-px h-0.5',
+                knockoutUnderline[tab.group],
+              ]}
+              aria-hidden="true"
+            />
+          )}
+        </a>
+      );
+    })
+  }
+</nav>

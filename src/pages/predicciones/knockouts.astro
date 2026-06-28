@@ -3,31 +3,117 @@ import Layout from '../../layouts/Layout.astro';
 import PageHeader from '../../components/PageHeader.astro';
 import ShadowContainer from '../../components/ShadowContainer.astro';
 import PredictionsTabs from '../../components/predictions/PredictionsTabs.astro';
+import KnockoutTabs from '../../components/predictions/KnockoutTabs.astro';
+import PredictionsSection, { type MatchDay } from '../../components/matches/PredictionsSection.astro';
+import { groupByDate, splitByTime } from '../../lib/matches';
+import { loadTournament } from '../../lib/sync';
+import { loadPredictions } from '../../lib/server/predictions';
 import { resolveDisplayName } from '../../lib/displayName';
+import {
+  knockoutRounds,
+  getRoundById,
+  getRoundByMatchRound,
+  knockoutPastBg,
+  knockoutUpcomingBg,
+} from '../../data/knockoutRounds';
 
 const currentUser = Astro.locals.user;
+const targetUid = Astro.url.searchParams.get('uid');
+const roundParam = Astro.url.searchParams.get('round');
 
-if (!currentUser) {
+if (!currentUser && !targetUid) {
   return Astro.redirect(
     '/login?from=' + encodeURIComponent(Astro.url.pathname + Astro.url.search),
   );
 }
 
-const targetUid = Astro.url.searchParams.get('uid');
-const isReadOnly = Boolean(targetUid) && targetUid !== currentUser.uid;
+const isReadOnly = Boolean(targetUid) && targetUid !== currentUser?.uid;
+
+let pastDays: MatchDay[] = [];
+let upcomingDays: MatchDay[] = [];
+const availableRounds: string[] = [];
+let activeRoundId: string | null = null;
+let predictions: import('../../lib/server/predictions').PredictionsMap = {};
+let loadError = false;
 
 let pageTitle = 'Knockouts — PICKEM';
 let pageHeading = 'Predicciones de knockouts';
 let pageHighlight = 'knockouts';
 let showDescription = true;
 
-if (isReadOnly && targetUid) {
-  const name = await resolveDisplayName(targetUid);
-  pageTitle = `Knockouts de ${name} — PICKEM`;
-  pageHeading = `Predicciones de knockouts de ${name}`;
-  pageHighlight = 'knockouts de';
-  showDescription = false;
+try {
+  const tournament = await loadTournament();
+  const allDates = [...new Set(tournament.matches.map((m) => m.date))].sort();
+  const dayNumberByDate = new Map(allDates.map((d, i) => [d, i + 1]));
+
+  const byRound = new Map<string, typeof tournament.matches>();
+  for (const match of tournament.matches) {
+    const cfg = getRoundByMatchRound(match.round);
+    if (!cfg) continue;
+    const list = byRound.get(cfg.id) ?? [];
+    list.push(match);
+    byRound.set(cfg.id, list);
+  }
+  for (const r of knockoutRounds) {
+    if (byRound.has(r.id)) availableRounds.push(r.id);
+  }
+
+  if (roundParam && availableRounds.includes(roundParam)) {
+    activeRoundId = roundParam;
+  } else {
+    for (const rid of availableRounds) {
+      const matches = byRound.get(rid) ?? [];
+      const partition = splitByTime(matches, new Date());
+      if (partition.upcoming.length > 0) {
+        activeRoundId = rid;
+        break;
+      }
+    }
+    if (!activeRoundId && availableRounds.length > 0) {
+      activeRoundId = availableRounds[0];
+    }
+  }
+
+  if (activeRoundId) {
+    const roundMatches = byRound.get(activeRoundId) ?? [];
+    const partition = splitByTime(roundMatches, new Date());
+    const pastByDate = groupByDate(partition.past);
+    const upcomingByDate = groupByDate(partition.upcoming);
+
+    const toMatchDay = ([dateISO, matches]: [string, typeof tournament.matches]): MatchDay => ({
+      dateISO,
+      dayNumber: dayNumberByDate.get(dateISO) ?? 0,
+      matches,
+    });
+
+    pastDays = [...pastByDate.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(toMatchDay);
+
+    upcomingDays = [...upcomingByDate.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(toMatchDay);
+  }
+
+  if (isReadOnly && targetUid) {
+    predictions = await loadPredictions(Astro.cookies, targetUid);
+    const name = await resolveDisplayName(targetUid);
+    pageTitle = `Knockouts de ${name} — PICKEM`;
+    pageHeading = `Predicciones de knockouts de ${name}`;
+    pageHighlight = 'knockouts de';
+    showDescription = false;
+  } else if (currentUser) {
+    predictions = await loadPredictions(Astro.cookies);
+  }
+} catch (err) {
+  console.error('knockouts: load failed', err);
+  loadError = true;
 }
+
+const activeRoundConfig = activeRoundId ? getRoundById(activeRoundId) : undefined;
+const pastBg = activeRoundConfig ? knockoutPastBg[activeRoundConfig.group] : 'bg-white';
+const upcomingBg = activeRoundConfig ? knockoutUpcomingBg[activeRoundConfig.group] : 'bg-white';
+const hasAnyMatch = pastDays.length > 0 || upcomingDays.length > 0;
 ---
 
 <Layout
@@ -51,16 +137,58 @@ if (isReadOnly && targetUid) {
 
     <PredictionsTabs current="knockouts" />
 
-    <div class="mt-6">
-      <ShadowContainer bgClass="bg-white">
-        <div class="flex flex-col items-center justify-center gap-2 p-8 text-center">
-          <span class="text-3xl" aria-hidden="true">🚧</span>
-          <p class="text-base font-semibold text-text">Próximamente</p>
-          <p class="text-sm text-text-tertiary">
-            Estamos preparando esta sección. Volvé pronto para pronosticar la fase eliminatoria.
-          </p>
+    {
+      availableRounds.length > 0 && (
+        <div class="mt-4">
+          <KnockoutTabs
+            current={activeRoundId ?? ''}
+            availableRounds={availableRounds}
+            uid={targetUid}
+          />
         </div>
-      </ShadowContainer>
-    </div>
+      )
+    }
+
+    {
+      loadError ? (
+        <p class="text-sm text-text-tertiary py-8 text-center">
+          No se pudieron cargar los partidos. Reintentá en unos minutos.
+        </p>
+      ) : availableRounds.length === 0 ? (
+        <p class="text-sm text-text-tertiary py-8 text-center">No hay partidos de eliminatorias disponibles.</p>
+      ) : !hasAnyMatch ? (
+        <p class="text-sm text-text-tertiary py-8 text-center">No hay partidos en esta ronda.</p>
+      ) : (
+        <div class="mt-4 flex flex-col gap-3">
+          <ShadowContainer bgClass={pastBg}>
+            <PredictionsSection
+              label="Partidos pasadas"
+              defaultOpen={false}
+              matchDays={pastDays}
+              predictions={predictions}
+              readOnly={isReadOnly}
+              emptyMessage="Aún no hay partidos finalizados en esta ronda."
+              bare
+            />
+          </ShadowContainer>
+          <ShadowContainer bgClass={upcomingBg}>
+            <PredictionsSection
+              label="Próximos partidos"
+              defaultOpen={true}
+              matchDays={upcomingDays}
+              predictions={predictions}
+              readOnly={isReadOnly}
+              emptyMessage="No hay partidos pendientes en esta ronda."
+              bare
+            />
+          </ShadowContainer>
+        </div>
+      )
+    }
   </div>
 </Layout>
+
+<script>
+  import { mountPredictionsController } from '../../scripts/predictionsController';
+  mountPredictionsController();
+</script>
