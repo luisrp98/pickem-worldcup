@@ -21,8 +21,10 @@ interface UserAggregate {
   knockoutPreviousPosition: number | null;
 }
 
-function isGroupRound(round: unknown): boolean {
-  return typeof round === 'string' && round.toLowerCase().startsWith('group');
+function isGroupRound(group: unknown, round: unknown): boolean {
+  if (typeof group === 'string' && group.length > 0) return true;
+  if (typeof round === 'string' && round.toLowerCase().startsWith('group')) return true;
+  return false;
 }
 
 function readPosition(value: unknown): number | null {
@@ -76,7 +78,7 @@ async function aggregateUser(
 
   for (const doc of predictionsSnap.docs) {
     const data = doc.data();
-    const isGroup = isGroupRound(data.round);
+    const isGroup = isGroupRound(data.group, data.round);
 
     if (typeof data.points === 'number') {
       points += data.points;

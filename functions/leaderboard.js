@@ -20,8 +20,10 @@ function readPos(value) {
   return null;
 }
 
-function isGroupRound(round) {
-  return typeof round === 'string' && round.toLowerCase().startsWith('group');
+function isGroupRound(group, round) {
+  if (typeof group === 'string' && group.length > 0) return true;
+  if (typeof round === 'string' && round.toLowerCase().startsWith('group')) return true;
+  return false;
 }
 
 async function readExistingPositions(uids) {
@@ -83,7 +85,7 @@ async function readUserAggregate(uid, officialAnswers) {
 
   for (const doc of predictionsSnap.docs) {
     const data = doc.data();
-    const isGroup = isGroupRound(data.round);
+    const isGroup = isGroupRound(data.group, data.round);
 
     if (typeof data.points === 'number') {
       points += data.points;

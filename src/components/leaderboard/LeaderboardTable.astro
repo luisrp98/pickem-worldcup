@@ -22,6 +22,19 @@ const captionLabel = {
   knockouts: 'Clasificación de la fase eliminatoria',
   'crystal-ball': 'Clasificación de la bola de cristal',
 }[phase];
+
+const positionField = {
+  total: 'currentPosition',
+  groups: 'groupCurrentPosition',
+  knockouts: 'knockoutCurrentPosition',
+  'crystal-ball': 'crystalBallCurrentPosition',
+}[phase];
+
+const sortedEntries = [...entries].sort((a, b) => {
+  const aPos = (a as unknown as Record<string, number>)[positionField] ?? 0;
+  const bPos = (b as unknown as Record<string, number>)[positionField] ?? 0;
+  return aPos - bPos;
+});
 ---
 
 <table class="w-full border-collapse border border-border">
@@ -54,7 +67,7 @@ const captionLabel = {
   </thead>
   <tbody>
     {
-      entries.map((entry) => (
+      sortedEntries.map((entry) => (
         <LeaderboardRow entry={entry} phase={phase} currentUserUid={currentUserUid} />
       ))
     }
