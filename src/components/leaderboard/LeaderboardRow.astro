@@ -4,31 +4,86 @@ import PositionBadge from './PositionBadge.astro';
 import PositionChangeIndicator from './PositionChangeIndicator.astro';
 import Avatar from './Avatar.astro';
 import { initialsFromName } from '../../lib/displayName';
+import type { Phase } from './LeaderboardTable.astro';
 
 export interface Props {
   entry: LeaderboardEntry;
+  phase: Phase;
   currentUserUid?: string;
 }
 
-const { entry, currentUserUid } = Astro.props;
+const { entry, phase, currentUserUid } = Astro.props;
+
+interface ViewData {
+  position: number;
+  previousPosition: number | null;
+  points: number;
+  correctResults: number | null;
+  correctScores: number | null;
+  resolvedCount: number | null;
+}
+
+function getView(entry: LeaderboardEntry, phase: Phase): ViewData {
+  switch (phase) {
+    case 'groups':
+      return {
+        position: entry.groupCurrentPosition,
+        previousPosition: entry.groupPreviousPosition,
+        points: entry.groupPoints,
+        correctResults: entry.groupCorrectResults,
+        correctScores: entry.groupCorrectScores,
+        resolvedCount: null,
+      };
+    case 'knockouts':
+      return {
+        position: entry.knockoutCurrentPosition,
+        previousPosition: entry.knockoutPreviousPosition,
+        points: entry.knockoutPoints,
+        correctResults: entry.knockoutCorrectResults,
+        correctScores: entry.knockoutCorrectScores,
+        resolvedCount: null,
+      };
+    case 'crystal-ball':
+      return {
+        position: entry.crystalBallCurrentPosition,
+        previousPosition: null,
+        points: entry.crystalBallPoints,
+        correctResults: null,
+        correctScores: null,
+        resolvedCount: entry.crystalBallCorrectCount,
+      };
+    case 'total':
+    default:
+      return {
+        position: entry.currentPosition,
+        previousPosition: entry.previousPosition,
+        points: entry.totalPoints,
+        correctResults: entry.correctResults,
+        correctScores: entry.correctScores,
+        resolvedCount: null,
+      };
+  }
+}
+
+const view = getView(entry, phase);
 
 const tdBase = 'px-5 py-3.5 border-b border-border text-sm';
 
 const podiumBg =
-  entry.currentPosition === 1
+  view.position === 1
     ? 'bg-gold/10'
-    : entry.currentPosition === 2
+    : view.position === 2
       ? 'bg-silver/10'
-      : entry.currentPosition === 3
+      : view.position === 3
         ? 'bg-bronze/10'
         : '';
 
 const podiumBorder =
-  entry.currentPosition === 1
+  view.position === 1
     ? 'border-l-4 border-gold'
-    : entry.currentPosition === 2
+    : view.position === 2
       ? 'border-l-4 border-silver'
-      : entry.currentPosition === 3
+      : view.position === 3
         ? 'border-l-4 border-bronze'
         : '';
 
@@ -38,15 +93,21 @@ const isSelf = Boolean(currentUserUid) && entry.uid === currentUserUid;
 const nameLinkClass = isSelf
   ? 'inline-block font-semibold text-text rounded-sm ring-1 ring-arceus-accent-500/60 px-1.5 py-0.5 hover:underline hover:text-text-hover-primary transition-colors'
   : 'font-semibold text-text hover:underline hover:text-text-hover-primary transition-colors';
+
+const isCb = phase === 'crystal-ball';
 ---
 
 <tr class:list={[podiumBg, podiumBorder]} data-self={isSelf ? 'true' : undefined}>
   <td class={tdBase}>
-    <PositionBadge pos={entry.currentPosition} />
+    <PositionBadge pos={view.position} />
   </td>
-  <td class={`${tdBase} max-sm:hidden`}>
-    <PositionChangeIndicator current={entry.currentPosition} previous={entry.previousPosition} />
-  </td>
+  {
+    !isCb && (
+      <td class={`${tdBase} max-sm:hidden`}>
+        <PositionChangeIndicator current={view.position} previous={view.previousPosition} />
+      </td>
+    )
+  }
   <td class={tdBase}>
     <Avatar initials={initials} />
   </td>
@@ -55,13 +116,28 @@ const nameLinkClass = isSelf
       {entry.displayName}
     </a>
   </td>
-  <td class={`${tdBase} max-sm:hidden`}>
-    <span class="font-medium text-text">{entry.correctResults}</span>
-  </td>
-  <td class={`${tdBase} max-sm:hidden`}>
-    <span class="font-medium text-text">{entry.correctScores}</span>
-  </td>
+  {
+    !isCb && view.correctResults !== null && (
+      <td class={`${tdBase} max-sm:hidden`}>
+        <span class="font-medium text-text">{view.correctResults}</span>
+      </td>
+    )
+  }
+  {
+    !isCb && view.correctScores !== null && (
+      <td class={`${tdBase} max-sm:hidden`}>
+        <span class="font-medium text-text">{view.correctScores}</span>
+      </td>
+    )
+  }
+  {
+    isCb && view.resolvedCount !== null && (
+      <td class={tdBase}>
+        <span class="font-medium text-text">{view.resolvedCount}</span>
+      </td>
+    )
+  }
   <td class={tdBase}>
-    <span class="font-bold text-base text-text">{entry.points}</span>
+    <span class="font-bold text-base text-text">{view.points}</span>
   </td>
 </tr>

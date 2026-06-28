@@ -2,31 +2,61 @@
 import type { LeaderboardEntry } from '../../data/leaderboard';
 import LeaderboardRow from './LeaderboardRow.astro';
 
+export type Phase = 'total' | 'groups' | 'knockouts' | 'crystal-ball';
+
 export interface Props {
   entries: LeaderboardEntry[];
+  phase: Phase;
   currentUserUid?: string;
 }
 
-const { entries, currentUserUid } = Astro.props;
+const { entries, phase, currentUserUid } = Astro.props;
 
 const thBase =
   'text-xs font-semibold tracking-widest uppercase text-text-secondary text-left px-5 py-3.5 border-b border-border bg-muted';
+
+const isCb = phase === 'crystal-ball';
+const captionLabel = {
+  total: 'Clasificación total',
+  groups: 'Clasificación de la fase de grupos',
+  knockouts: 'Clasificación de la fase eliminatoria',
+  'crystal-ball': 'Clasificación de la bola de cristal',
+}[phase];
 ---
 
 <table class="w-full border-collapse border border-border">
-  <caption class="sr-only">Clasificación de participantes</caption>
+  <caption class="sr-only">{captionLabel}</caption>
   <thead>
     <tr>
       <th scope="col" class={`${thBase} w-14`}>POS</th>
-      <th scope="col" class={`${thBase} w-12 max-sm:hidden`}></th>
-      <th scope="col" class={`${thBase} w-14`}></th>
+      {
+        !isCb && (
+          <th scope="col" class={`${thBase} w-12 max-sm:hidden`} aria-label="Cambio de posición" />
+        )
+      }
+      <th scope="col" class={`${thBase} w-14`} aria-label="Avatar" />
       <th scope="col" class={thBase}>USUARIO</th>
-      <th scope="col" class={`${thBase} w-28 max-sm:hidden`}>ACIERTOS RESULTADO</th>
-      <th scope="col" class={`${thBase} w-28 max-sm:hidden`}>ACIERTOS MARCADOR</th>
+      {
+        !isCb && (
+          <>
+            <th scope="col" class={`${thBase} w-28 max-sm:hidden`}>
+              ACIERTOS RESULTADO
+            </th>
+            <th scope="col" class={`${thBase} w-28 max-sm:hidden`}>
+              ACIERTOS MARCADOR
+            </th>
+          </>
+        )
+      }
+      {isCb && <th scope="col" class={`${thBase} w-24`}>RESUELTOS</th>}
       <th scope="col" class={`${thBase} w-16`}>PTS</th>
     </tr>
   </thead>
   <tbody>
-    {entries.map((entry) => <LeaderboardRow entry={entry} currentUserUid={currentUserUid} />)}
+    {
+      entries.map((entry) => (
+        <LeaderboardRow entry={entry} phase={phase} currentUserUid={currentUserUid} />
+      ))
+    }
   </tbody>
 </table>
