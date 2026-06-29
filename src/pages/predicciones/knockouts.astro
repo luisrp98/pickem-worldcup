@@ -129,7 +129,7 @@ const hasAnyMatch = pastDays.length > 0 || upcomingDays.length > 0;
       {
         showDescription && (
           <Fragment slot="description">
-            Acá vas a poder pronosticar los cruces de la fase eliminatoria. <span aria-hidden="true">🏆</span>
+            Aquí vas a poder pronosticar los cruces de la fase eliminatoria. <span aria-hidden="true">🏆</span>
           </Fragment>
         )
       }
@@ -152,7 +152,7 @@ const hasAnyMatch = pastDays.length > 0 || upcomingDays.length > 0;
     {
       loadError ? (
         <p class="text-sm text-text-tertiary py-8 text-center">
-          No se pudieron cargar los partidos. Reintentá en unos minutos.
+          No se pudieron cargar los partidos. Reintenta en unos minutos.
         </p>
       ) : availableRounds.length === 0 ? (
         <p class="text-sm text-text-tertiary py-8 text-center">No hay partidos de eliminatorias disponibles.</p>
@@ -162,7 +162,7 @@ const hasAnyMatch = pastDays.length > 0 || upcomingDays.length > 0;
         <div class="mt-4 flex flex-col gap-3">
           <ShadowContainer bgClass={pastBg}>
             <PredictionsSection
-              label="Partidos pasadas"
+              label="Partidos pasados"
               defaultOpen={false}
               matchDays={pastDays}
               predictions={predictions}

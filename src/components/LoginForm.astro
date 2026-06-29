@@ -93,14 +93,14 @@ const { from = '/' } = Astro.props;
     'auth/user-disabled': 'Esta cuenta está deshabilitada.',
     'auth/user-not-found': 'No existe una cuenta con ese email.',
     'auth/wrong-password': 'Contraseña incorrecta.',
-    'auth/too-many-requests': 'Demasiados intentos. Probá de nuevo en unos minutos.',
-    'auth/network-request-failed': 'Error de red. Revisá tu conexión.',
-    'auth/missing-password': 'Ingresá tu contraseña.',
+    'auth/too-many-requests': 'Demasiados intentos. Prueba de nuevo en unos minutos.',
+    'auth/network-request-failed': 'Error de red. Revisa tu conexión.',
+    'auth/missing-password': 'Ingresa tu contraseña.',
   };
 
   function getErrorMessage(code: string | undefined): string {
-    if (!code) return 'No se pudo iniciar sesión. Intentá de nuevo.';
-    return ERROR_MESSAGES[code] ?? 'No se pudo iniciar sesión. Intentá de nuevo.';
+    if (!code) return 'No se pudo iniciar sesión. Intenta de nuevo.';
+    return ERROR_MESSAGES[code] ?? 'No se pudo iniciar sesión. Intenta de nuevo.';
   }
 
   function init() {
@@ -123,7 +123,7 @@ const { from = '/' } = Astro.props;
       const password = String(formData.get('password') ?? '');
 
       if (!email || !password) {
-        errorEl.textContent = 'Ingresá email y contraseña.';
+        errorEl.textContent = 'Ingresa email y contraseña.';
         errorEl.classList.remove('hidden');
         return;
       }

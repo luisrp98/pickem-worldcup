@@ -85,7 +85,7 @@ const todayFormatted = todayDateISO ? formatMatchdayDate(todayDateISO) : '';
         matchesError ? (
           <ShadowContainer bgClass="bg-white">
             <p class="text-sm text-text-tertiary py-8 text-center">
-              No se pudieron cargar los partidos. Reintentá en unos minutos.
+              No se pudieron cargar los partidos. Reintenta en unos minutos.
             </p>
           </ShadowContainer>
         ) : todayMatches.length === 0 ? (
@@ -95,7 +95,7 @@ const todayFormatted = todayDateISO ? formatMatchdayDate(todayDateISO) : '';
               <p class="text-sm text-text-tertiary py-4 text-center">Hoy no hay partidos.</p>
               <div class="flex justify-end">
                 <a href="/predicciones" class="text-xs font-semibold tracking-wider uppercase hover:underline">
-                  Mirá todas las jornadas →
+                  Mira todas las jornadas →
                 </a>
               </div>
             </div>
