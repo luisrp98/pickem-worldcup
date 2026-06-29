@@ -6,12 +6,9 @@ import RuleCard from '../components/RuleCard.astro';
 import PointsTable from '../components/PointsTable.astro';
 import BulletList from '../components/BulletList.astro';
 import {
-  phaseGroupsMatches,
-  phaseGroupsPositions,
   knockoutRounds,
   knockoutBonus,
   specialPredictions,
-  knockoutTies,
   considerations,
 } from '../data/rules';
 ---
@@ -29,7 +26,7 @@ import {
     </PageHeader>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <RuleCard number={1} title="Cierre de predicciones">
+      <RuleCard number={1} title="Cierre de predicciones" class="md:col-span-2">
         <p class="leading-relaxed">
           Las predicciones de cada partido se cierran
           <strong class="text-text font-semibold">10 minutos antes del inicio oficial</strong> del encuentro. Después de eso,
@@ -37,29 +34,7 @@ import {
         </p>
       </RuleCard>
 
-      <RuleCard number={2} title="Fase de grupos — Partidos">
-        <p class="mb-4">{phaseGroupsMatches.intro}</p>
-        <PointsTable data={phaseGroupsMatches} />
-      </RuleCard>
-
-      <RuleCard number={3} title="Fase de grupos — Predicción de posiciones">
-        <p class="mb-4">{phaseGroupsPositions.intro}</p>
-        <PointsTable data={phaseGroupsPositions} />
-      </RuleCard>
-
-      <RuleCard number={4} title="Jackpot de grupos">
-        <p class="leading-relaxed">
-          Por acertar la cantidad exacta de puntos obtenidos por los cuatro equipos de un grupo, te llevás
-          <span
-            class="inline-flex items-baseline gap-1 mx-1 px-2 py-0.5 rounded-sm bg-arceus-accent-400 text-arceus-secondary-950 font-bold text-lg"
-          >
-            20<span class="text-[0.625rem] font-semibold tracking-widest uppercase">pts</span>
-          </span>
-          al bolsillo. ¡La grande, baby! <span aria-hidden="true">🏆</span>
-        </p>
-      </RuleCard>
-
-      <RuleCard number={5} title="Fase eliminatoria" class="md:col-span-2">
+      <RuleCard number={2} title="Fase eliminatoria" class="md:col-span-2">
         <p class="mb-4 leading-relaxed">
           Las predicciones corresponden al resultado al finalizar los
           <strong class="text-text font-semibold">90 minutos reglamentarios</strong>.
@@ -83,11 +58,7 @@ import {
         </div>
       </RuleCard>
 
-      <RuleCard number={6} title="Empates en fase eliminatoria">
-        <BulletList items={knockoutTies} class="space-y-2" />
-      </RuleCard>
-
-      <RuleCard number={7} title="Predicciones especiales">
+      <RuleCard number={3} title="Predicciones especiales" class="md:col-span-2">
         <p class="mb-4">{specialPredictions.intro}</p>
         <PointsTable data={specialPredictions} />
       </RuleCard>
