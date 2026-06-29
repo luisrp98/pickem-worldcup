@@ -82,7 +82,7 @@ const inputClass =
     showPoints &&
       (points.resultado || points.marcador ? (
         <div class="text-xs text-arceus-accent-700 text-center font-semibold tabular-nums">
-          {points.resultado && <span>+2 resultado </span>}
+          {points.resultado && <span>+{points.base} resultado </span>}
           {points.marcador && <span>+5 marcador</span>}
         </div>
       ) : (

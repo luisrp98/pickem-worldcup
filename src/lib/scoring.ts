@@ -4,6 +4,7 @@ export interface Prediction {
 }
 
 export interface MatchPoints {
+  base: number;
   points: number;
   resultado: boolean;
   marcador: boolean;
@@ -60,7 +61,7 @@ export function calculateMatchPoints(
   const result = real1 === real2 ? 'draw' : real1 > real2 ? 'home' : 'away';
 
   if (!prediction) {
-    return { points: 0, resultado: false, marcador: false };
+    return { base: 0, points: 0, resultado: false, marcador: false };
   }
 
   const predResult =
@@ -74,5 +75,5 @@ export function calculateMatchPoints(
     : ((typeof match.round === 'string' ? KNOCKOUT_POINTS[match.round] : undefined) ?? 0);
 
   const points = (resultado ? base : 0) + (marcador ? EXACT_SCORE_BONUS : 0);
-  return { points, resultado, marcador };
+  return { base: resultado ? base : 0, points, resultado, marcador };
 }
