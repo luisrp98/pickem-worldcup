@@ -19,6 +19,15 @@ const isReadOnly = Boolean(targetUid) && targetUid !== currentUser.uid;
 
 const teams = Object.keys(flags).sort((a, b) => a.localeCompare(b, 'es'));
 const teamOptions = teams.map((t) => ({ value: t, label: t }));
+
+const getMaxPointsLabel = (q: (typeof crystalBallQuestions)[number]): string => {
+  if (q.pointsByValue) {
+    const values = Object.values(q.pointsByValue);
+    return `Vale ${Math.min(...values)} a ${Math.max(...values)} puntos`;
+  }
+  return `Vale ${q.points} puntos`;
+};
+
 const [savedAnswers, settings, entries] = await Promise.all([
   loadCrystalBallAnswers(Astro.cookies, isReadOnly ? (targetUid ?? undefined) : undefined),
   loadCrystalBallSettings(),
@@ -72,6 +81,7 @@ if (isReadOnly && targetUid) {
                   disabled
                   officialValue={entry?.officialValue ?? null}
                   points={entry?.points ?? null}
+                  maxPointsLabel={getMaxPointsLabel(q)}
                   bgClass={q.bgClass}
                   circleBgClass={q.circleBgClass}
                 />
@@ -83,7 +93,7 @@ if (isReadOnly && targetUid) {
         <>
           {isClosed && (
             <div class="mt-6 rounded-sm border border-border bg-arceus-accent-100 px-4 py-3 text-sm text-text-secondary">
-              Las predicciones de Crystal Ball están cerradas. Podés ver tus respuestas pero no editarlas.
+              Las predicciones de Crystal Ball están cerradas. Puedes ver tus respuestas pero no editarlas.
             </div>
           )}
           <form
@@ -108,6 +118,7 @@ if (isReadOnly && targetUid) {
                     disabled={isClosed}
                     officialValue={entry?.officialValue ?? null}
                     points={entry?.points ?? null}
+                    maxPointsLabel={getMaxPointsLabel(q)}
                     bgClass={q.bgClass}
                     circleBgClass={q.circleBgClass}
                   />

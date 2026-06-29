@@ -14,6 +14,7 @@ export interface Props {
   name?: string;
   officialValue?: string | null;
   points?: number | null;
+  maxPointsLabel?: string;
   bgClass?: string;
   circleBgClass?: string;
 }
@@ -30,6 +31,7 @@ const {
   name,
   officialValue = null,
   points = null,
+  maxPointsLabel,
   bgClass = 'bg-arceus-accent-300 border border-arceus-accent-200',
   circleBgClass = 'bg-arceus-accent-100',
 } = Astro.props;
@@ -82,7 +84,7 @@ if (isScored && points > 0) {
       inputType === 'select' ? (
         <select id={inputId} name={fieldName} disabled={disabled} aria-label={question} class={inputClass}>
           <option value="" disabled selected={value === ''}>
-            Seleccioná una opción
+            Selecciona una opción
           </option>
           {options.map((opt) => (
             <option value={opt.value} selected={opt.value === value}>
@@ -93,7 +95,7 @@ if (isScored && points > 0) {
       ) : inputType === 'team' ? (
         <select id={inputId} name={fieldName} disabled={disabled} aria-label={question} class={inputClass}>
           <option value="" disabled selected={value === ''}>
-            Seleccioná un equipo
+            Selecciona un equipo
           </option>
           {options.map((opt) => (
             <option value={opt.value} selected={opt.value === value}>
@@ -115,14 +117,21 @@ if (isScored && points > 0) {
       )
     }
   </div>
-  <div class="mt-4 flex items-center justify-end gap-2 shrink-0">
-    <span
-      class:list={['text-xs font-semibold tracking-wider uppercase px-2 py-1 rounded-sm whitespace-nowrap', badgeClass]}
-    >
-      {badgeText}
-    </span>
-    <span class:list={['text-xs font-semibold whitespace-nowrap', statusClass]}>
-      {statusText}
-    </span>
+  <div class="mt-4 flex items-center justify-between gap-2 shrink-0">
+    {maxPointsLabel && (
+      <span class="text-xs font-semibold tracking-wider uppercase text-text whitespace-nowrap">
+        {maxPointsLabel}
+      </span>
+    )}
+    <div class="flex items-center gap-2 ml-auto">
+      <span
+        class:list={['text-xs font-semibold tracking-wider uppercase px-2 py-1 rounded-sm whitespace-nowrap', badgeClass]}
+      >
+        {badgeText}
+      </span>
+      <span class:list={['text-xs font-semibold whitespace-nowrap', statusClass]}>
+        {statusText}
+      </span>
+    </div>
   </div>
 </ShadowContainer>
